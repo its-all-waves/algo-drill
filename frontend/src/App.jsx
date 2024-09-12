@@ -4,32 +4,44 @@ import './App.css'
 const BACKEND = 'http://localhost:8000'
 
 export default function App() {
+    const [algoText, setAlgoText] = useState(
+`for thingy in thingies:
+    thingy = 42
+    print(thingy)`
+    )
+
+    const [typedText, setTypedText] = useState('')
+    
     return (
         <>
             <div id="wrapper">
-                <TextBoxBackground />
-                <TextBox />
+                <TypingInputBackground 
+                    content={algoText} 
+                    setContent={setAlgoText}/>
+                <TypingInput 
+                    value={typedText} 
+                    setValue={setTypedText}/>
             </div>
         </>
     )
 }
 
-function TextBox() {
-    const [typedText, setTypedText] = useState('algo')
 
+
+function TypingInput({ value, setValue }) {
     return <textarea
-        name="typing-input" 
-        id="typing-input" 
-        cols="40" 
-        rows="20" 
-        value={typedText}
-        onChange={(e) => setTypedText(e.target.value)}/>
+        id="typing-input"
+        name="typing-input"
+        cols="40"
+        rows="20"
+        value={value}
+        onChange={(e) => setValue(e.target.value)} />
 }
 
-function TextBoxBackground() {
-    return <div id="text-box-background">
+function TypingInputBackground({ content, setContent }) {
+    return <div id="typing-input-background">
         <pre>
-            algorithm
+            {content}
         </pre>
     </div>
 }
