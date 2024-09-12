@@ -1,43 +1,35 @@
 import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 const BACKEND = 'http://localhost:8000'
 
 export default function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <TestComponent /> 
-    </>
-  )
+    return (
+        <>
+            <div id="wrapper">
+                <TextBoxBackground />
+                <TextBox />
+            </div>
+        </>
+    )
 }
 
+function TextBox() {
+    const [typedText, setTypedText] = useState('algo')
 
-function TestComponent() {
-    const [message, setMessage] = useState({})
+    return <textarea
+        name="typing-input" 
+        id="typing-input" 
+        cols="40" 
+        rows="20" 
+        value={typedText}
+        onChange={(e) => setTypedText(e.target.value)}/>
+}
 
-    useEffect(() => {
-        fetch(`${BACKEND}/test`)
-            .then(resp => {
-                const data = resp.json()
-                return data
-            })
-            .then(data => {
-                console.log(data)
-                setMessage(data)
-            })
-    }, [])
-
-    return <div>Message: {message.message}</div>
+function TextBoxBackground() {
+    return <div id="text-box-background">
+        <pre>
+            algorithm
+        </pre>
+    </div>
 }
