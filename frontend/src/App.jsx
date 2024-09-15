@@ -27,13 +27,7 @@ const SRC_CODE_CHARS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qQwWeErRtTyYuUiIoOpP[{]}\\|aAs
 function TypingInput({ }) {
     // TODO: use a separate array for keeping track of actual typed character
 
-    const [lineElems, setLineElems] = useState([])
-
-    const [lineIndex, setLineIndex] = useState('-1')
-
     const [currentLine, setCurrentLine] = useState(null) // need a ref to current line to know where to add a char / miss
-
-    const [typedText, setTypedText] = useState('')
 
     function addMiss(line) {
         const miss = document.createElement('span')
@@ -52,8 +46,6 @@ function TypingInput({ }) {
     function moveCursorToEnd(editorElem) {
         const range = document.createRange()
         const selection = window.getSelection()
-        // range.setStart(editorElem, editorElem.childNodes.length)
-        // range.collapse(true)
         range.setEndAfter(editorElem.lastChild)
         range.collapse(false)
         selection.removeAllRanges()
@@ -86,7 +78,6 @@ function TypingInput({ }) {
             
             // add the key everywhere (complete me a few lines down -- add to correct or missed)
             line.innerHTML += key
-            // setTypedText(TypedText + key)
 
             // check correct or missed
 
@@ -102,12 +93,9 @@ function TypingInput({ }) {
         id="typing-input"
         name="typing-input"
         contentEditable
-        // onClick={(e) => e.target.focus()}
         onKeyDown={onKeyDown}
         tabIndex={0}
-    // ref={thisElem}
     >
-        {lineElems}
     </div>
 }
 
