@@ -47,6 +47,10 @@
     white-space: pre;
 }
 
-.missed-key {
+.missed {
     color: red;
+}
+
+.line {
+    white-space: pre;
 }
