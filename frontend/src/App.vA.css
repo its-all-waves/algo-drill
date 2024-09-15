@@ -19,7 +19,6 @@
 }
 
 #typing-input {
-    font-family: monospace;
     background: transparent;
 }
 
@@ -45,8 +44,4 @@
 
 #typing-input * {
     white-space: pre;
-}
-
-.missed-key {
-    color: red;
 }

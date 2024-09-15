@@ -5,4 +5,7 @@
     "javascript.format.enable": true,
 
     "editor.tabSize": 4,
+    "cSpell.words": [
+        "Elems"
+    ],
 }
