@@ -78,18 +78,6 @@ export default function App() {
         const ZERO_WIDTH_SPACE_HTML = '&ZeroWidthSpace;'  // or '&#8203' // add to innerHTML
         const ZERO_WIDTH_SPACE_JS = '\u200B'  // use for comparison in js
 
-        const { altKey, ctrlKey, metaKey, shiftKey } = event
-        const ILLEGAL_KEYS = [
-            'Shift', 'Control', 'Meta', 'Alt',
-            'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'
-        ]
-        let typedCorrectKey = false
-        
-        // CATCH KEYS THAT SHOULD NOT IMPACT TEXT OR SCORE, RETURN EARLY
-        if (ILLEGAL_KEYS.includes(key)) {
-            return
-        }
-
         // CATCH BACKSPACE, RETURN EARLY
         if (key === 'Backspace') {
             // case: empty editor -> prevent negative keyIndex
@@ -106,25 +94,42 @@ export default function App() {
                 setCurrentLineElem(line)
             }
 
-            // remove a char
-            line.innerHTML = line.innerHTML.substring(0, line.innerHTML.length - 1)  // ...and yes, do it twice!
+            // remove a char or a missed char
+            line.lastChild.className === 'missed'
+                ? line.lastChild.remove()
+                : line.innerHTML = line.innerHTML.substring(0, line.innerHTML.length - 1)  // ...and yes, do it twice!
+            
+            // TODO: turn caret red when in a span.missed ?
 
             // TODO: handle modifiers
+
             setKeyIndex(keyIndex - 1)
             moveCursorToEnd(editorElem)
             return
         }
 
+        
         // ONLY KEYS PRINTABLE IN SOURCE CODE BEYOND THIS POINT
+        let keyIsCorrect = false
+
         if (key === 'Enter') {
             const NEW_LINE = '\n'
             line.innerHTML += NEW_LINE
             line = addLine(editorElem)
             line.innerHTML = ZERO_WIDTH_SPACE_HTML  // hack to get cursor at start of this new line
             
-            typedCorrectKey = algoText[keyIndex] === NEW_LINE
+            keyIsCorrect = algoText[keyIndex] === NEW_LINE
+            if (keyIsCorrect) {
+                setCorrectKeyCount(correctKeyCount + 1)
+                // console.log('🟩')
+            } else {
+                setMissedKeys([...missedKeys, algoText[keyIndex]])
+                console.log('🟥')
+            }
+
             setTypedText(typedText + NEW_LINE)
             setKeyIndex(keyIndex + 1)
+            moveCursorToEnd(editorElem)
         }
         
         else if (key === 'Tab') {
@@ -132,31 +137,54 @@ export default function App() {
             const TAB = SPACE + SPACE + SPACE + SPACE
             line.innerHTML += TAB
 
-            typedCorrectKey = algoText.substring(keyIndex, keyIndex + 4) === TAB
+            keyIsCorrect = algoText.substring(keyIndex, keyIndex + 4) === TAB
+            if (keyIsCorrect) {
+                setCorrectKeyCount(correctKeyCount + 1)
+                // console.log('🟩')
+            } else {
+                setMissedKeys([...missedKeys, algoText[keyIndex]])
+                console.log('🟥')
+            }
+
             setTypedText(typedText + TAB)
             setKeyIndex(keyIndex + 4)
+            moveCursorToEnd(editorElem)
         }
 
         else if (SRC_CODE_CHARS.includes(key)) {
             const { innerHTML } = line
             if (innerHTML === ZERO_WIDTH_SPACE_JS) line.innerHTML = '' // remove the hack referenced above
-            line.innerHTML += key
+            
+            keyIsCorrect = key === algoText[keyIndex] 
+            if (keyIsCorrect) {
+                line.innerHTML += key
+                setCorrectKeyCount(correctKeyCount + 1)
+                // console.log('🟩')
+            } else {
+                line.innerHTML += `<span class="missed">${key}</span>`
+                setMissedKeys([...missedKeys, algoText[keyIndex]])
+                console.log('🟥')
+            }
 
-            typedCorrectKey = key === algoText[keyIndex]
             setTypedText(typedText + key)
             setKeyIndex(keyIndex + 1)
+            moveCursorToEnd(editorElem)
+        } 
+        
+        else {
+            return  // don't respond to any key not yet specified
         }
 
-        if (typedCorrectKey) {
-            setCorrectKeyCount(correctKeyCount + (key === 'Tab' ? 4 : 1))
-            // console.log('🟩')
-        } else {
-            setMissedKeys([...missedKeys, algoText[keyIndex]])
-            console.log('🟥')
-        }
+        // if (keyIsCorrect) {
+        //     setCorrectKeyCount(correctKeyCount + (key === 'Tab' ? 4 : 1))
+        //     // console.log('🟩')
+        // } else {
+        //     setMissedKeys([...missedKeys, algoText[keyIndex]])
+        //     console.log('🟥')
+        // }
 
-        console.log('typed: ', key, 'algo: ', algoText[keyIndex])
-        moveCursorToEnd(editorElem)
+        // console.log('typed: ', key, 'algo: ', algoText[keyIndex])
+        
     }
 
     return (
