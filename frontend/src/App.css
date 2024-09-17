@@ -9,48 +9,16 @@
 	/* text-align: center; */
 }
 
-
-
-
-#CodeInput {
-    position: relative;
-    width: 40ch;
-    height: 40ch;
+.center-children {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
-#typing-input {
-    font-family: monospace;
-    background: transparent;
-}
-
-#typing-input-background {
-    z-index: -1;
-    background-color: rgb(0, 0, 76) !important;
-    color: green;
-    pointer-events: none;
-}
-
-#typing-input, #typing-input-background {
-    position: absolute;
-    inset: 0;
-    border-radius: 0.5rem;
-}
-
-#typing-input, #typing-input-background {
-    margin: 0;
-    padding: 1rem;
-    font-size: inherit;
-    tab-size: 4;
-}
-
-#typing-input * {
-    white-space: pre;
-}
-
-.missed {
-    color: red;
-}
-
-.line {
-    white-space: pre;
+.spread-children {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
 }

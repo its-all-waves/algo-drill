@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import './CodeInput.css'
 
 const BACKEND = 'http://localhost:8000'
 
