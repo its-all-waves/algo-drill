@@ -1,0 +1,25 @@
+:root {
+	--char-color-default: hsl(252, 100%, 86%);
+	--char-color-correct: #00ffb7;
+	--char-color-wrong: #c10060;
+}
+
+.char {
+	color: var(--char-color-default);
+	text-align: center;
+	padding-bottom: 0.1rem; /* push the border / 'underline' down a bit */
+}
+
+.char.correct {
+	color: var(--char-color-correct);
+	color: green;
+}
+
+.char.wrong {
+	color: var(--char-color-wrong)
+}
+
+.char.active {
+	border-bottom: .2rem solid;
+	border-color: var(--char-color-default)
+}

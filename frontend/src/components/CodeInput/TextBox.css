@@ -1,0 +1,25 @@
+:root {
+	--line-width-chars: 80;
+	--text-box-font-size: calc(100vw / var(--line-width-chars));
+	--text-box-bg: #00000046;
+}
+
+
+.text-box {
+	font-size: var(--text-box-font-size);
+	width: 100%;
+	overflow: scroll;
+	border: 1px solid white;
+	border-radius: 0.5rem;
+	padding: 1rem;
+
+	background: var(--text-box-bg)
+}
+
+.text-box:focus {
+	outline: 0.1rem solid rgba(255, 255, 255, 0.762);	
+}
+
+::-webkit-scrollbar {
+	display: none;
+}
