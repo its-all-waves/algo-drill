@@ -9,48 +9,89 @@ import TextBox from './components/CodeInput/TextBox'
 
 
 const NON_BREAKING_SPACE_UNICODE = '\u00A0'  // &nbsp; in html
-const SPACE = ' '
+const SPACE_CHAR_ASCII = ' '
+const SPACE_CHAR_HTML = '&nbsp;'
 const TAB_WIDTH = 4
-const TAB = SPACE.repeat(TAB_WIDTH)
+const TAB = SPACE_CHAR_ASCII.repeat(TAB_WIDTH)
 
 const LINE_WIDTH_CHARS = 20
 
-const SRC_CODE_CHARS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qQwWeErRtTyYuUiIoOpP[{]}\\|aAsSdDfFgGhHjJkKlL;:'\"zZxXcCvVbBnNmM,<.>/? "
+const SRC_CODE_CHARS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qQwWeErRtTyYuUiIoOpP[{]}\\|aAsSdDfFgGhHjJkKlL;:'\"zZxXcCvVbBnNmM,<.>/?"
 
 const root = document.querySelector(':root')
 root.style.setProperty('--line-width-chars', LINE_WIDTH_CHARS)
 
 
 export default function App() {
+    // STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    const [testComplete, setTestComplete] = useState(false)
+    const [lineIndex, setLineIndex] = useState(0)
+    const [charIndex, setCharIndex] = useState(0)
+
+    const [correctKeys, setCorrectKeys] = useState([])
+    const [missedChars, setMissedChars] = useState([])
 
     const text = `for:
     thingy = 42
     print(thingy)`
 
-    const [textComplete, setTestComplete] = useState(false)
-    const [lineIndex, setLineIndex] = useState(0)
-    const [charIndex, setCharIndex] = useState(0)
+    const linesOfText = text.split('\n')
+    for (let i = 0; i < linesOfText.length; i++) { linesOfText[i] += '\n' }  // use .length - 1 to exclude the last line
+    const lineCount = linesOfText.length
+
+    // DERIVED STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     let activeLineId = lineId(lineIndex)
+
     useEffect(() => {
         activeLineId = lineId(lineIndex)
     }, [lineIndex])
 
     let activeCharId = charId(lineIndex, charIndex)
-    let charFromText = text[0]
+    let currentChar = text[0]
+
     useEffect(() => {
-        activeCharId = charId(lineIndex, charIndex)
-        charFromText = linesOfText[lineIndex][charIndex]
+        // activeCharId = charId(lineIndex, charIndex)
+        activeCharId
+        currentChar = linesOfText[lineIndex][charIndex]
     }, [charIndex, /* lineIndex */])
 
-    // DEBUG
+
+    let stats = {
+        percentCorrect: 0 * 100,
+    }
+
+    useEffect(() => {
+        if (testComplete) {
+            stats.percentCorrect = correctKeys.length / text.length
+        }
+        console.log('percent correct: ', stats.percentCorrect)
+    }, [testComplete])
+
+    // END STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     useEffect(() => {
         console.log('updated active coords: ', lineIndex, charIndex)
-    }, [charIndex, lineIndex]);
+    }, [charIndex, lineIndex])
 
-    const linesOfText = text.split('\n')
-    for (let i = 0; i < linesOfText.length; i++) { linesOfText[i] += '\n' }  // use .length - 1 to exclude the last line
-    const lineCount = linesOfText.length
+    // useEffect(() => {
+    //     console.log(': : : : : : char: ', linesOfText[lineIndex][charIndex - 1])
+    // }, [charIndex])
+
+    useEffect(() => {
+        console.log('correct keys: ', correctKeys)
+    }, [correctKeys])
+
+    useEffect(() => {
+        console.log('missed keys: ', missedChars)
+    }, [missedChars])
+
+    // END DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    let charNumber = 0
 
     return <>
         <div style={{ margin: '1rem' }}>
@@ -66,6 +107,7 @@ export default function App() {
                                         id={id}
                                         active={id === activeCharId}
                                         isControlChar={char === '\n'}
+                                        charNumber={charNumber++}
                                     >
                                         {char === ' '
                                             ? NON_BREAKING_SPACE_UNICODE
@@ -86,14 +128,15 @@ export default function App() {
         event.preventDefault()
         const { key } = event
 
-        const keyCanPrint =
-            (SRC_CODE_CHARS + 'Enter' + 'Tab' + 'Backspace').includes(key)
+        const keyCanPrint = (
+            SRC_CODE_CHARS + SPACE_CHAR_ASCII + SPACE_CHAR_HTML
+            + 'Enter' + 'Tab' + 'Backspace'
+        ).includes(key)
         if (!keyCanPrint) return
 
         if (key === 'Backspace') {
             // TODO: account for tabs -- ? equiv to 4 spaces ? so if we detect 4 spaces, behind us, then delete TAB_WIDTH and decrement TAB_WIDTH
             const prevChars = prevTabWidthChars()
-            
             let decrement
             if (prevChars === TAB) {
                 decrement = TAB_WIDTH
@@ -106,24 +149,46 @@ export default function App() {
             return  // do nothing else, leave the func
         }
 
+        // DEBUG
+        console.log(':::::: char: ', currentChar)
+
         const keyIsSourceCodeChar = SRC_CODE_CHARS.includes(key)
         if (keyIsSourceCodeChar) {
-            const keyIsCorrect = key === charFromText
+            const keyIsCorrect = currentChar === key
             if (keyIsCorrect) {
                 console.log('🟩')
+                setCorrectKeys([...correctKeys, currentChar])
             } else {
                 console.log('🟥')
+                setMissedChars([...missedChars, currentChar])
+            }
+            if (!incrementCharIndex(1)) {
+                setTestComplete(true)
+                return
+            }
+        } else if (key === SPACE_CHAR_ASCII) {
+            debugger
+            const keyIsCorrect = currentChar === SPACE_CHAR_ASCII
+                || currentChar === SPACE_CHAR_HTML  // may change which space char = space in `text`, hence the OR
+            if (keyIsCorrect) {
+                console.log('🟩')
+                setCorrectKeys([...correctKeys, 'Space'])
+            } else {
+                console.log('🟥')
+                setMissedChars([...missedChars, 'Space'])
             }
             if (!incrementCharIndex(1)) {
                 setTestComplete(true)
                 return
             }
         } else if (key === 'Enter') {
-            const keyIsCorrect = '\n' === charFromText
+            const keyIsCorrect = currentChar === '\n'
             if (keyIsCorrect) {
                 console.log('🟩')
+                setCorrectKeys([...correctKeys, key])
             } else {
                 console.log('🟥')
+                setMissedChars([...missedChars, key])
             }
             if (!incrementCharIndex(1)) {
                 setTestComplete(true)
@@ -132,10 +197,13 @@ export default function App() {
         } else if (key === 'Tab') {
             const nextChars = nextTabWidthChars()
             const keyIsCorrect = nextChars === TAB
+            const tabAsSpaces = TAB.split('')
             if (keyIsCorrect) {
                 console.log('🟩')
+                setCorrectKeys([...correctKeys, ...tabAsSpaces])
             } else {
                 console.log('🟥')
+                setMissedChars([...missedChars, ...tabAsSpaces])
             }
             if (!incrementCharIndex(TAB_WIDTH)) {
                 setTestComplete(true)
@@ -143,7 +211,7 @@ export default function App() {
             }
         }
 
-
+        console.log('- - - - score: ', correctKeys.length / activeCharNumber())
     }
 
     /** Returns `null` if on the last character, or [nextLineIndex, nextCharIndex] if did increment */
@@ -169,13 +237,13 @@ export default function App() {
 
     function decrementCharIndex(amount) {
         amount = Math.abs(amount)
-        
+
         const atStartOfLine = charIndex === 0
         const onFirstLine = lineIndex === 0
         const onFirstChar = onFirstLine && atStartOfLine
         if (onFirstChar) return null
 
-        
+
         let prevCharIndex = -1
         if (!atStartOfLine) {
             prevCharIndex = charIndex - amount
@@ -190,14 +258,14 @@ export default function App() {
         if (atStartOfLine && !onFirstLine) {
             outputLineIndex = lineIndex - 1
             setLineIndex(outputLineIndex)
-        }     
+        }
 
         return [outputLineIndex, prevCharIndex]
     }
 
     /** Returns the next `TAB_WIDTH` chars from `linesOfText` */
     function nextTabWidthChars() {
-        const lineIsShorterThanTabWidth = 
+        const lineIsShorterThanTabWidth =
             linesOfText[lineIndex].length < TAB_WIDTH
         if (lineIsShorterThanTabWidth) return null
 
@@ -212,6 +280,12 @@ export default function App() {
         if (charIndex < 3) return null
 
         return linesOfText[lineIndex].substring(charIndex - 4, charIndex)
+    }
+
+    function activeCharNumber() {
+        const activeChar = document.querySelectorAll('.char.active')[0]
+        const activeCharNumber = activeChar.dataset.charNumber
+        return activeCharNumber
     }
 }
 

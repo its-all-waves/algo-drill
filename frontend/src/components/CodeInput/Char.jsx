@@ -3,6 +3,7 @@ import './Char.css'
 export default function Char({
     children, 
     id = -1,
+    charNumber,
     active = false, 
     wrong = false,
     correct = false,
@@ -15,6 +16,6 @@ export default function Char({
     if (wrong) classes += ' wrong'
     if (isControlChar) classes += ' faded'
     return (
-        <span id={'char-'+id} className={classes}>{children}</span>
+        <span id={'char-'+id} className={classes} data-char-number={charNumber}>{children}</span>
     )
 s}
