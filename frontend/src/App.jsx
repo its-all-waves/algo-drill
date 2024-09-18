@@ -63,11 +63,12 @@ export default function App() {
     }
 
     useEffect(() => {
-        if (testComplete) {
-            stats.percentCorrect = correctKeys.length / text.length
-        }
-        console.log('percent correct: ', stats.percentCorrect)
-    }, [testComplete])
+        // if (testComplete) {
+        //     stats.percentCorrect = correctKeys.length / text.length
+        // }
+        console.log('- - - - score: ', correctKeys.length / activeCharNumber())
+        // console.log('percent correct: ', stats.percentCorrect)
+    }, [testComplete, charIndex])
 
     // END STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -167,7 +168,6 @@ export default function App() {
                 return
             }
         } else if (key === SPACE_CHAR_ASCII) {
-            debugger
             const keyIsCorrect = currentChar === SPACE_CHAR_ASCII
                 || currentChar === SPACE_CHAR_HTML  // may change which space char = space in `text`, hence the OR
             if (keyIsCorrect) {
@@ -210,8 +210,6 @@ export default function App() {
                 return
             }
         }
-
-        console.log('- - - - score: ', correctKeys.length / activeCharNumber())
     }
 
     /** Returns `null` if on the last character, or [nextLineIndex, nextCharIndex] if did increment */
