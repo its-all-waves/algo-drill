@@ -23,6 +23,14 @@ root.style.setProperty('--line-width-chars', LINE_WIDTH_CHARS)
 
 
 export default function App() {
+
+    const [textSource, linesOfText] = prepared(
+        `for:
+    thingy = 42
+    print(thingy)`
+    )
+    const lineCount = linesOfText.length
+
     // STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     const [testComplete, setTestComplete] = useState(false)
@@ -31,14 +39,6 @@ export default function App() {
 
     const [correctKeys, setCorrectKeys] = useState([])
     const [missedChars, setMissedChars] = useState([])
-
-    const text = `for:
-    thingy = 42
-    print(thingy)`
-
-    const linesOfText = text.split('\n')
-    for (let i = 0; i < linesOfText.length; i++) { linesOfText[i] += '\n' }  // use .length - 1 to exclude the last line
-    const lineCount = linesOfText.length
 
     // DERIVED STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -49,7 +49,7 @@ export default function App() {
     }, [lineIndex])
 
     let activeCharId = charId(lineIndex, charIndex)
-    let currentChar = text[0]
+    let currentChar = textSource[0]
 
     useEffect(() => {
         // activeCharId = charId(lineIndex, charIndex)
@@ -63,11 +63,9 @@ export default function App() {
     }
 
     useEffect(() => {
-        // if (testComplete) {
-        //     stats.percentCorrect = correctKeys.length / text.length
-        // }
-        console.log('- - - - score: ', correctKeys.length / activeCharNumber())
-        // console.log('percent correct: ', stats.percentCorrect)
+        debugger    
+        stats.percentCorrect = correctKeys.length / activeCharNumber() === NaN ? 0 : correctKeys.length / activeCharNumber() * 100
+        console.log('- - - - percent correct : missed = ', `${stats.percentCorrect}%  :  ${missedChars.length}`)
     }, [testComplete, charIndex])
 
     // END STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -169,7 +167,7 @@ export default function App() {
             }
         } else if (key === SPACE_CHAR_ASCII) {
             const keyIsCorrect = currentChar === SPACE_CHAR_ASCII
-                || currentChar === SPACE_CHAR_HTML  // may change which space char = space in `text`, hence the OR
+                || currentChar === SPACE_CHAR_HTML  // may change which space char = space in `textSource`, hence the OR
             if (keyIsCorrect) {
                 console.log('🟩')
                 setCorrectKeys([...correctKeys, 'Space'])
@@ -283,7 +281,7 @@ export default function App() {
     function activeCharNumber() {
         const activeChar = document.querySelectorAll('.char.active')[0]
         const activeCharNumber = activeChar.dataset.charNumber
-        return activeCharNumber
+        return +activeCharNumber
     }
 }
 
@@ -293,4 +291,15 @@ function charId(lineIndex, charIndex) {
 
 function lineId(lineIndex) {
     return `line-${lineIndex}`
+}
+
+/** TODO: move to backend? 
+ * @returns {Array<string>} 
+ * @param {string} textSource
+*/
+function prepared(textSource) {
+    if (!textSource.endsWith('\n')) textSource += '\n'
+    textSource = textSource.replace(/\t/g, TAB)
+    const asLines = textSource.split(/(?<=\n)/)  // keep the \n at end of line
+    return [textSource, asLines]
 }
