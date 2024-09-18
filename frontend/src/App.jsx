@@ -9,17 +9,16 @@ import TextBox from './components/CodeInput/TextBox'
 
 
 const NON_BREAKING_SPACE_UNICODE = '\u00A0'  // &nbsp; in html
+const NON_BREAKING_SPACE_HTML = '&nbsp;'
 const SPACE_CHAR_ASCII = ' '
-const SPACE_CHAR_HTML = '&nbsp;'
 const TAB_WIDTH = 4
 const TAB = SPACE_CHAR_ASCII.repeat(TAB_WIDTH)
 
-const LINE_WIDTH_CHARS = 20
-
 const SRC_CODE_CHARS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qQwWeErRtTyYuUiIoOpP[{]}\\|aAsSdDfFgGhHjJkKlL;:'\"zZxXcCvVbBnNmM,<.>/?"
 
+const LINE_WIDTH_CHARS_COUNT = 20
 const root = document.querySelector(':root')
-root.style.setProperty('--line-width-chars', LINE_WIDTH_CHARS)
+root.style.setProperty('--line-width-chars', LINE_WIDTH_CHARS_COUNT)
 
 
 export default function App() {
@@ -33,60 +32,55 @@ export default function App() {
 
     // STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    const [testComplete, setTestComplete] = useState(false)
-    const [lineIndex, setLineIndex] = useState(0)
-    const [charIndex, setCharIndex] = useState(0)
+    const [$testComplete, setTestComplete] = useState(false)
+    const [$currLineIndex, setCurrLineIndex] = useState(0)
+    const [$currCharIndex, setCurrCharIndex] = useState(0)
 
-    const [correctKeys, setCorrectKeys] = useState([])
-    const [missedChars, setMissedChars] = useState([])
+    const [$correctKeys, setCorrectKeys] = useState([])
+    const [$missedChars, setMissedChars] = useState([])
 
     // DERIVED STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    let activeLineId = lineId(lineIndex)
+    let $activeLineId = lineId($currLineIndex)
 
     useEffect(() => {
-        activeLineId = lineId(lineIndex)
-    }, [lineIndex])
+        $activeLineId = lineId($currLineIndex)
+    }, [$currLineIndex])
 
-    let activeCharId = charId(lineIndex, charIndex)
-    let currentChar = textSource[0]
-
-    useEffect(() => {
-        // activeCharId = charId(lineIndex, charIndex)
-        activeCharId
-        currentChar = linesOfText[lineIndex][charIndex]
-    }, [charIndex, /* lineIndex */])
-
-
-    let stats = {
-        percentCorrect: 0 * 100,
-    }
+    let $currentChar = textSource[0]
 
     useEffect(() => {
-        debugger    
-        stats.percentCorrect = correctKeys.length / activeCharNumber() === NaN ? 0 : correctKeys.length / activeCharNumber() * 100
-        console.log('- - - - percent correct : missed = ', `${stats.percentCorrect}%  :  ${missedChars.length}`)
-    }, [testComplete, charIndex])
+        $currentChar = linesOfText[$currLineIndex][$currCharIndex]
+    }, [$currCharIndex])
+
+    // let stats = {
+    //     percentCorrect: 0 * 100,
+    // }
+
+    // useEffect(() => {  
+    //     stats.percentCorrect = correctKeys.length / highestCharNumberReached === NaN ? 0 : correctKeys.length / highestCharNumberReached * 100
+    //     console.log('- - - - percent correct : missed = ', `${stats.percentCorrect}%  :  ${missedChars.length}`)
+    // }, [testComplete, charIndex])
 
     // END STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     // DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     useEffect(() => {
-        console.log('updated active coords: ', lineIndex, charIndex)
-    }, [charIndex, lineIndex])
+        console.log('updated active coords: ', $currLineIndex, $currCharIndex)
+    }, [$currCharIndex, $currLineIndex])
 
     // useEffect(() => {
     //     console.log(': : : : : : char: ', linesOfText[lineIndex][charIndex - 1])
     // }, [charIndex])
 
     useEffect(() => {
-        console.log('correct keys: ', correctKeys)
-    }, [correctKeys])
+        console.log('correct keys: ', $correctKeys)
+    }, [$correctKeys])
 
     useEffect(() => {
-        console.log('missed keys: ', missedChars)
-    }, [missedChars])
+        console.log('missed keys: ', $missedChars)
+    }, [$missedChars])
 
     // END DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -104,7 +98,8 @@ export default function App() {
                                     <Char
                                         key={id}
                                         id={id}
-                                        active={id === activeCharId}
+                                        active={id === charId($currLineIndex,
+                                            $currCharIndex)}
                                         isControlChar={char === '\n'}
                                         charNumber={charNumber++}
                                     >
@@ -128,65 +123,55 @@ export default function App() {
         const { key } = event
 
         const keyCanPrint = (
-            SRC_CODE_CHARS + SPACE_CHAR_ASCII + SPACE_CHAR_HTML
+            SRC_CODE_CHARS + SPACE_CHAR_ASCII + NON_BREAKING_SPACE_HTML
             + 'Enter' + 'Tab' + 'Backspace'
         ).includes(key)
         if (!keyCanPrint) return
 
         if (key === 'Backspace') {
-            // TODO: account for tabs -- ? equiv to 4 spaces ? so if we detect 4 spaces, behind us, then delete TAB_WIDTH and decrement TAB_WIDTH
-            const prevChars = prevTabWidthChars()
-            let decrement
-            if (prevChars === TAB) {
-                decrement = TAB_WIDTH
-                const prevIndices = decrementCharIndex(decrement)
-            } else {
-                decrement = 1
-                const prevIndices = decrementCharIndex(decrement)
-                if (!prevIndices) return  // can't go back further than the 1st char
-            }
-            return  // do nothing else, leave the func
+            decrementCharIndex(prevTabWidthChars() === TAB ? TAB_WIDTH : 1)
+            return
         }
 
         // DEBUG
-        console.log(':::::: char: ', currentChar)
+        console.log(':::::: char: ', $currentChar)
 
         const keyIsSourceCodeChar = SRC_CODE_CHARS.includes(key)
         if (keyIsSourceCodeChar) {
-            const keyIsCorrect = currentChar === key
+            const keyIsCorrect = $currentChar === key
             if (keyIsCorrect) {
                 console.log('🟩')
-                setCorrectKeys([...correctKeys, currentChar])
+                setCorrectKeys([...$correctKeys, $currentChar])
             } else {
                 console.log('🟥')
-                setMissedChars([...missedChars, currentChar])
+                setMissedChars([...$missedChars, $currentChar])
             }
             if (!incrementCharIndex(1)) {
                 setTestComplete(true)
                 return
             }
         } else if (key === SPACE_CHAR_ASCII) {
-            const keyIsCorrect = currentChar === SPACE_CHAR_ASCII
-                || currentChar === SPACE_CHAR_HTML  // may change which space char = space in `textSource`, hence the OR
+            const keyIsCorrect = $currentChar === SPACE_CHAR_ASCII
+                || $currentChar === NON_BREAKING_SPACE_HTML  // may change which space char = space in `textSource`, hence the OR
             if (keyIsCorrect) {
                 console.log('🟩')
-                setCorrectKeys([...correctKeys, 'Space'])
+                setCorrectKeys([...$correctKeys, 'Space'])
             } else {
                 console.log('🟥')
-                setMissedChars([...missedChars, 'Space'])
+                setMissedChars([...$missedChars, 'Space'])
             }
             if (!incrementCharIndex(1)) {
                 setTestComplete(true)
                 return
             }
         } else if (key === 'Enter') {
-            const keyIsCorrect = currentChar === '\n'
+            const keyIsCorrect = $currentChar === '\n'
             if (keyIsCorrect) {
                 console.log('🟩')
-                setCorrectKeys([...correctKeys, key])
+                setCorrectKeys([...$correctKeys, key])
             } else {
                 console.log('🟥')
-                setMissedChars([...missedChars, key])
+                setMissedChars([...$missedChars, key])
             }
             if (!incrementCharIndex(1)) {
                 setTestComplete(true)
@@ -198,10 +183,10 @@ export default function App() {
             const tabAsSpaces = TAB.split('')
             if (keyIsCorrect) {
                 console.log('🟩')
-                setCorrectKeys([...correctKeys, ...tabAsSpaces])
+                setCorrectKeys([...$correctKeys, ...tabAsSpaces])
             } else {
                 console.log('🟥')
-                setMissedChars([...missedChars, ...tabAsSpaces])
+                setMissedChars([...$missedChars, ...tabAsSpaces])
             }
             if (!incrementCharIndex(TAB_WIDTH)) {
                 setTestComplete(true)
@@ -212,21 +197,21 @@ export default function App() {
 
     /** Returns `null` if on the last character, or [nextLineIndex, nextCharIndex] if did increment */
     function incrementCharIndex(amount) {
-        const nextLineIndex = lineIndex + 1
+        const nextLineIndex = $currLineIndex + 1
         if (nextLineIndex > lineCount) throw new Error(`Incrementing the line index by "${amount}" results in an out of range index`)
 
-        const activeLineLength = linesOfText[lineIndex].length
-        const nextCharIndex = charIndex + amount
+        const activeLineLength = linesOfText[$currLineIndex].length
+        const nextCharIndex = $currCharIndex + amount
         const incrementIsTooLarge = nextCharIndex > activeLineLength
         if (incrementIsTooLarge) throw new Error(`Incrementing the line index by "${amount}" results in an out of range index`)
 
-        const onLastLine = lineIndex === lineCount - 1
-        const atEndOfLine = charIndex === activeLineLength - 1
+        const onLastLine = $currLineIndex === lineCount - 1
+        const atEndOfLine = $currCharIndex === activeLineLength - 1
         const onLastChar = onLastLine && atEndOfLine
         if (onLastChar) return null
 
-        setCharIndex(atEndOfLine ? 0 : nextCharIndex)
-        if (atEndOfLine && !onLastLine) setLineIndex(nextLineIndex)
+        setCurrCharIndex(atEndOfLine ? 0 : nextCharIndex)
+        if (atEndOfLine && !onLastLine) setCurrLineIndex(nextLineIndex)
 
         return [nextLineIndex, nextCharIndex]
     }
@@ -234,26 +219,26 @@ export default function App() {
     function decrementCharIndex(amount) {
         amount = Math.abs(amount)
 
-        const atStartOfLine = charIndex === 0
-        const onFirstLine = lineIndex === 0
+        const atStartOfLine = $currCharIndex === 0
+        const onFirstLine = $currLineIndex === 0
         const onFirstChar = onFirstLine && atStartOfLine
         if (onFirstChar) return null
 
 
         let prevCharIndex = -1
         if (!atStartOfLine) {
-            prevCharIndex = charIndex - amount
-            setCharIndex(prevCharIndex)
+            prevCharIndex = $currCharIndex - amount
+            setCurrCharIndex(prevCharIndex)
         } else {
             // get index of end of prev line
-            const lastCharOnPrevLineIndex = linesOfText[lineIndex - 1].length - 1
-            setCharIndex(lastCharOnPrevLineIndex)
+            const lastCharOnPrevLineIndex = linesOfText[$currLineIndex - 1].length - 1
+            setCurrCharIndex(lastCharOnPrevLineIndex)
         }
 
-        let outputLineIndex = lineIndex
+        let outputLineIndex = $currLineIndex
         if (atStartOfLine && !onFirstLine) {
-            outputLineIndex = lineIndex - 1
-            setLineIndex(outputLineIndex)
+            outputLineIndex = $currLineIndex - 1
+            setCurrLineIndex(outputLineIndex)
         }
 
         return [outputLineIndex, prevCharIndex]
@@ -262,20 +247,19 @@ export default function App() {
     /** Returns the next `TAB_WIDTH` chars from `linesOfText` */
     function nextTabWidthChars() {
         const lineIsShorterThanTabWidth =
-            linesOfText[lineIndex].length < TAB_WIDTH
+            linesOfText[$currLineIndex].length < TAB_WIDTH
         if (lineIsShorterThanTabWidth) return null
 
-        return linesOfText[lineIndex /* + 1 */]
-            .substring(charIndex, charIndex + TAB_WIDTH)
+        return linesOfText[$currLineIndex]
+            .substring($currCharIndex, $currCharIndex + TAB_WIDTH)
     }
 
     function prevTabWidthChars() {
-        // if 4 or more chars are left in this line (tab won't span more than 1 line)
-
         // if less than 4 ahead of start of line
-        if (charIndex < 3) return null
+        if ($currCharIndex < 3) return null
 
-        return linesOfText[lineIndex].substring(charIndex - 4, charIndex)
+        return linesOfText[$currLineIndex]
+            .substring($currCharIndex - 4, $currCharIndex)
     }
 
     function activeCharNumber() {
