@@ -158,16 +158,16 @@ export default function App() {
         const keyIsSourceCodeChar = SRC_CODE_CHARS.includes(key)
         if (keyIsSourceCodeChar) {
             const keyIsCorrect = $activeChar.character === key
-            setSingleCharStatus(keyIsCorrect)
+            setSingleCharStatus(keyIsCorrect, key)
 
         } else if (key === SPACE_CHAR_ASCII) {
             const keyIsCorrect = $activeChar.character === SPACE_CHAR_ASCII
                 || $activeChar.character === NON_BREAKING_SPACE_HTML  // may change which space char = space in `textSource`, hence the OR
-            setSingleCharStatus(keyIsCorrect)
+            setSingleCharStatus(keyIsCorrect, key)
 
         } else if (key === 'Enter') {
             const keyIsCorrect = $activeChar.character === '\n'
-            setSingleCharStatus(keyIsCorrect)
+            setSingleCharStatus(keyIsCorrect, key)
 
         } else if (key === 'Tab') {
             const nextChars = nextTabWidthChars()
@@ -244,7 +244,7 @@ export default function App() {
         return false
     }
 
-    function setSingleCharStatus(keyIsCorrect) {
+    function setSingleCharStatus(keyIsCorrect, keyPressed) {
         if (keyIsCorrect) {
             const charPreviouslyCorrect =
                 charArrayIncludes($correctChars, $activeCharId)
@@ -295,8 +295,8 @@ export default function App() {
                 )
             }
 
-            // ...add to missed chars
-            setMissedChars([...$missedChars, $activeChar])
+            // ...add to missed chars, adding the key pressed into the char
+            setMissedChars([...$missedChars, { ...$activeChar, keyPressed }])
             return
         }
     }
@@ -352,6 +352,15 @@ export default function App() {
                 setFixedChars(
                     $fixedChars.filter(c => !nextCharsIds.includes(c.id))
                 )
+            }
+
+            // apply key pressed to each char (is always space char )
+            if (TAB === SPACE_CHAR_ASCII.repeat(4)) {
+                nextTabWidthChars = nextTabWidthChars.map((char, i) => {
+                    return { ...char, keyPressed: `TabAsSpace-${i}` }
+                })
+            } else {
+                throw new Error(`The value of TAB has been changed.`)
             }
 
             // ...add to missed chars
@@ -413,7 +422,7 @@ HOW TO HANDLE FIXED CHARS
     - ONCE WE KNOW THIS WORKS, CONVERT THE CHAR STATUS ARRAYS INTO ARRAYS OF IDS ONLY
 
 TODO:
-    - [ ] find a way to add keyPressed to missed keys
+    - [X] find a way to add keyPressed to missed keys
     - [ ] 💀 deal with scrolling the text if it doesn't fit in the window
 
 
