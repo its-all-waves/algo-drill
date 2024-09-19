@@ -1,13 +1,18 @@
 :root {
 	--char-color-default: hsl(252, 100%, 86%);
-	--char-color-correct: white;
-	--char-color-wrong: #c10060;
+	/* --char-color-correct: white; */
+	--char-color-correct: rgb(194, 232, 145);
+	--char-color-wrong: hsl(330, 100%, 38%);
+	--char-color-fixed: hsl(330, 100%, 80%);
 }
 
 .char {
-	color: var(--char-color-default);
 	text-align: center;
 	padding-bottom: 0.2rem; /* push the border / 'underline' down a bit */
+}
+
+.char.unreached {
+	color: var(--char-color-default);
 }
 
 .char.correct {
@@ -15,13 +20,17 @@
 	color: var(--char-color-correct);
 }
 
-.char.wrong {
+.char.missed {
 	color: var(--char-color-wrong);
 }
 
 .char.correct,
-.char.wrong {
+.char.missed {
 	text-shadow: .05rem .05rem .1rem black;
+}
+
+.char.fixed {
+	color: var(--char-color-fixed);
 }
 
 .char.active {

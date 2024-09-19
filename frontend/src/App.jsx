@@ -40,12 +40,13 @@ export default function App() {
 
     const [$correctChars, setCorrectChars] = useState([])
     const [$missedChars, setMissedChars] = useState([])
+    const [$fixedChars, setFixedChars] = useState([])  // keep track of chars that were missed, but have been corrected -- allows recording all missed keys, even if corrected, but also color a corrected key differently than a missed one 
 
     const [$testComplete, setTestComplete] = useState(false)
 
     // DERIVED STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    let $activeChar = charWith($activeCharId)
+    let $activeChar = charWith($activeCharId) // TODO: try as const
     useEffect(() => {
         !$activeChar && setTestComplete(true)
     }, [$activeCharId])
@@ -53,17 +54,31 @@ export default function App() {
     // END STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     // DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    useEffect(() => {
+        console.clear()
+        /* $correctChars.length && */ console.log('correct chars: ', $correctChars)
+        /* $missedChars.length && */ console.log('missed chars: ', $missedChars)
+        /* $fixedChars.length && */ console.log('fixed chars: ', $fixedChars)
+    }, [$correctChars, $missedChars, $fixedChars])
+
+    // useEffect(() => {
+    //     $missedChars.length && console.log('missed chars: ', $missedChars)
+    // }, [$missedChars])
+
+    // useEffect(() => {
+    //     $fixedChars.length && console.log('fixed chars: ', $fixedChars)
+    // }, [$fixedChars]);
 
     useEffect(() => {
-        $correctChars.length && console.log('🟩')
+        // $correctChars.length && console.log('🟩') // will not work now that we can remove from the status arrays
     }, [$correctChars])
 
     useEffect(() => {
-        $missedChars.length && console.log('🟥')
+        // $missedChars.length && console.log('🟥')
     }, [$missedChars])
 
     useEffect(() => {
-       $testComplete && console.log('* * * TEST COMPLETE * * *')
+        $testComplete && console.log('* * * TEST COMPLETE * * *')
     }, [$testComplete])
 
     // useEffect(() => {
@@ -74,11 +89,9 @@ export default function App() {
     //     console.log('correct keys: ', $correctKeys)
     // }, [$correctKeys])
 
-    useEffect(() => {
-        $missedChars.length && console.log('missed keys: ', $missedChars)
-    }, [$missedChars])
-
     // END DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // MARKUP ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     return <>
         <div style={{ margin: '1rem' }}>
@@ -93,10 +106,12 @@ export default function App() {
                                         key={id}
                                         charId={id}
                                         status={charArrayIncludes($missedChars, id)
-                                            ? 'wrong'
+                                            ? 'missed'
                                             : charArrayIncludes($correctChars, id)
                                                 ? 'correct'
-                                                : null}
+                                                : charArrayIncludes($fixedChars, id)
+                                                    ? 'fixed'
+                                                    : 'unreached'}
                                         active={id === $activeCharId}
                                         controlChar={character === '\n'}
                                     >
@@ -117,6 +132,10 @@ export default function App() {
         </div>
     </>
 
+    // END MARKUP ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // METHODS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     function onKeyDown(event) {
         event.preventDefault()
         const { key } = event
@@ -136,27 +155,52 @@ export default function App() {
         const keyIsSourceCodeChar = SRC_CODE_CHARS.includes(key)
         if (keyIsSourceCodeChar) {
             const keyIsCorrect = $activeChar.character === key
-            keyIsCorrect 
-                ? setCorrectChars([...$correctChars, $activeChar])
-                : setMissedChars([...$missedChars, $activeChar])
+            handleKeyCorrectness(keyIsCorrect)
         } else if (key === SPACE_CHAR_ASCII) {
             const keyIsCorrect = $activeChar.character === SPACE_CHAR_ASCII
                 || $activeChar.character === NON_BREAKING_SPACE_HTML  // may change which space char = space in `textSource`, hence the OR
-            keyIsCorrect
-                ? setCorrectChars([...$correctChars, $activeChar])
-                : setMissedChars([...$missedChars, $activeChar])
+            handleKeyCorrectness(keyIsCorrect)
         } else if (key === 'Enter') {
             const keyIsCorrect = $activeChar.character === '\n'
-            keyIsCorrect
-                ? setCorrectChars([...$correctChars, $activeChar])
-                : setMissedChars([...$missedChars, $activeChar])
+            handleKeyCorrectness(keyIsCorrect)
         } else if (key === 'Tab') {
-            const nextChars = nextTabWidthChars()
+            const [nextChars, nextCharsIds] = nextTabWidthChars()
             const nextCharacters = nextChars.map(char => char.character).join('')
             const keyIsCorrect = nextCharacters === TAB
-            keyIsCorrect
-                ? setCorrectChars([...$correctChars, ...nextChars])
-                : setMissedChars([...$missedChars, ...nextChars])
+            // keyIsCorrect
+            //     ? setCorrectChars([...$correctChars, ...nextChars])
+            //     : setMissedChars([...$missedChars, ...nextChars])
+            debugger
+            if (keyIsCorrect) {
+                if (charArrayIncludes($missedChars, nextCharsIds)) {
+                    setMissedChars(
+                        $fixedChars.filter(c => !nextCharsIds.includes(c.id))
+                    )
+                    setFixedChars([...$fixedChars, ...nextChars])
+                } else if (charArrayIncludes($correctChars, nextCharsIds)) {
+                    // do nothing
+                } else if (charArrayIncludes($fixedChars, nextCharsIds)) {
+                    // do nothing
+                } else {
+                    setCorrectChars([...$correctChars, ...nextChars])
+                }
+            } else if (!keyIsCorrect) {
+                if (charArrayIncludes($missedChars, nextCharsIds)) {
+                    // do nothing
+                } else if (charArrayIncludes($correctChars, nextCharsIds)) {
+                    setCorrectChars(
+                        $fixedChars.filter(c => !nextCharsIds.includes(c.id))
+                    )
+                    setFixedChars([...$fixedChars, ...nextChars])
+                } else if (charArrayIncludes($fixedChars, nextCharsIds)) {
+                    setFixedChars(
+                        $fixedChars.filter(c => !nextCharsIds.includes(c.id))
+                    )
+                    setMissedChars([...$missedChars, ...nextChars])
+                } else {
+                    setMissedChars([...$missedChars, ...nextChars])
+                }
+            }
         } else {
             return  // don't respond to keys not denoted above
         }
@@ -183,7 +227,11 @@ export default function App() {
         const lineIsShorterThanTabWidth =
             charLinesArray[lineIndex].length < TAB_WIDTH
         if (lineIsShorterThanTabWidth) return null
-        return charLinesArray[lineIndex].slice(charIndex, charIndex + TAB_WIDTH)
+
+        const nextChars = charLinesArray[lineIndex]
+            .slice(charIndex, charIndex + TAB_WIDTH)
+        const nextCharsIds = nextChars.map(c => c.id)
+        return [nextChars, nextCharsIds]
     }
 
     function prevTabWidthChars() {
@@ -200,13 +248,92 @@ export default function App() {
         return null
     }
 
-    function charArrayIncludes(charArray, charId) {
+    function charArrayIncludes(charArray, charIdOrSequentialIds) {
+        debugger
+
+        if (charIdOrSequentialIds instanceof Array) {
+            // passed an array of contiguous ids
+            const charIds = charIdOrSequentialIds
+            const charsWithGivenIds = charArray.filter(c => charIds.includes(c.id))
+            if (charsWithGivenIds.length > charIds.length) return true
+            return false
+            // for (const char of charsWithGivenIds) {
+            //     if (!charArrayIncludes(charsWithGivenIds, char)) return false
+            // }
+            // return true
+        }
+
+        // passed an integer id
+        const charId = charIdOrSequentialIds
         for (let i = 0; i < charArray.length; i++) {
             const missedChar = charArray[i]
-            if (missedChar.id === charId) return missedChar
+            if (missedChar.id === charId) return true
         }
-        return null
+        return false
     }
+
+    function handleKeyCorrectness(keyIsCorrect) {
+        if (keyIsCorrect) {
+            const charPreviouslyCorrect =
+                charArrayIncludes($correctChars, $activeCharId)
+            const charPreviouslyFixed =
+                charArrayIncludes($fixedChars, $activeCharId)
+            if (charPreviouslyCorrect || charPreviouslyFixed) {
+                return  // do nothing
+            }
+
+            const charPreviouslyMissed =
+                charArrayIncludes($missedChars, $activeCharId)
+            if (charPreviouslyMissed) {
+                // move to fixed chars
+                setMissedChars(
+                    $missedChars.filter(c => c.id !== $activeCharId)
+                )
+                setFixedChars([...$fixedChars, $activeChar])
+                return
+            }
+
+            // first time hitting char
+            setCorrectChars([...$correctChars, $activeChar])
+            return
+        }
+
+        if (!keyIsCorrect) {
+            const charPreviouslyCorrect =
+                charArrayIncludes($correctChars, $activeCharId)
+            if (charPreviouslyCorrect) {
+                // move to missed chars
+                setCorrectChars(
+                    $correctChars.filter(c => c.id !== $activeCharId)
+                )
+                setMissedChars([...$missedChars, $activeChar])
+                return
+            }
+
+            const charPreviouslyMissed =
+                charArrayIncludes($missedChars, $activeCharId)
+            if (charPreviouslyMissed) {
+                return  // do nothing
+            }
+
+            const charPreviouslyFixed =
+                charArrayIncludes($fixedChars, $activeCharId)
+            if (charPreviouslyFixed) {
+                // move to missed chars
+                setFixedChars(
+                    $fixedChars.filter(c => c.id !== $activeCharId)
+                )
+                setMissedChars([...$missedChars, $activeChar])
+                return
+            }
+
+            // first time hitting char
+            setMissedChars([...$missedChars, $activeChar])
+            return
+        }
+    }
+
+    // END METHODS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 }
 
 /** TODO: move text treatment to backend? 
@@ -249,7 +376,21 @@ LEAVING OFF HERE:
             - to calculate score
                 - correctChars.length / textSource.length
 
-                
+HOW TO HANDLE FIXED CHARS
+    - if typed CORRECT key
+        - if char was already correct -> do nothing
+        - if char was already wrong -> move to fixed
+        - if char was already fixed -> do nothing
+        - if char is not in any status array yet -> add to correct
+    - if typed WRONG key
+        - if char was already correct -> move to missed
+        - if char was already wrong -> do nothing
+        - if char was already fixed -> move to missed
+        - if char is not in any status array yet -> add to wrong
+
+
+    - ONCE WE KNOW THIS WORKS, CONVERT THE CHAR STATUS ARRAYS INTO ARRAYS OF IDS ONLY
+
 TODO:
     - [ ] LEAVING OFF HERE above 
 
