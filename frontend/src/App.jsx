@@ -37,17 +37,17 @@ export default function App() {
     // STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     const [$activeCharId, setActiveCharId] = useState(0)
-    
+
     const [$correctChars, setCorrectChars] = useState([])
     const [$missedChars, setMissedChars] = useState([])
-    
+
     const [$testComplete, setTestComplete] = useState(false)
-    
+
     // DERIVED STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     let $activeChar = charWith($activeCharId)
     useEffect(() => {
-        if (!$activeChar) setTestComplete(true)
+        !$activeChar && setTestComplete(true)
     }, [$activeCharId])
 
     // END STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -55,7 +55,15 @@ export default function App() {
     // DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     useEffect(() => {
-        if ($testComplete) console.log('* * * TEST COMPLETE * * *')
+        $correctChars.length && console.log('🟩')
+    }, [$correctChars])
+
+    useEffect(() => {
+        $missedChars.length && console.log('🟥')
+    }, [$missedChars])
+
+    useEffect(() => {
+       $testComplete && console.log('* * * TEST COMPLETE * * *')
     }, [$testComplete])
 
     // useEffect(() => {
@@ -67,7 +75,7 @@ export default function App() {
     // }, [$correctKeys])
 
     useEffect(() => {
-        console.log('missed keys: ', $missedChars)
+        $missedChars.length && console.log('missed keys: ', $missedChars)
     }, [$missedChars])
 
     // END DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -113,14 +121,8 @@ export default function App() {
         event.preventDefault()
         const { key } = event
 
-        const keyCanPrint = (
-            SRC_CODE_CHARS + SPACE_CHAR_ASCII + NON_BREAKING_SPACE_HTML
-            + 'Enter' + 'Tab' + 'Backspace'
-        ).includes(key)
-        if (!keyCanPrint) return
-
         if (key === 'Backspace') {
-            const prevCharacters = 
+            const prevCharacters =
                 prevTabWidthChars()?.map(char => char.character).join('')
             decrementCharIndex(prevCharacters === TAB ? TAB_WIDTH : 1)
             return
@@ -129,63 +131,37 @@ export default function App() {
         // DEBUG
         // console.log(':::::: char: ', $activeChar.character)
 
+        // HANDLE CHAR INPUT +++++++++++++++++++++++++++++++++++++++++++++++++++
+
         const keyIsSourceCodeChar = SRC_CODE_CHARS.includes(key)
         if (keyIsSourceCodeChar) {
             const keyIsCorrect = $activeChar.character === key
-            if (keyIsCorrect) {
-                console.log('🟩')
-                setCorrectChars([...$correctChars, $activeChar])
-            } else {
-                console.log('🟥')
-                setMissedChars([...$missedChars, $activeChar])
-            }
-            if (!incrementActiveCharId(1)) {
-                setTestComplete(true)
-                return
-            }
+            keyIsCorrect 
+                ? setCorrectChars([...$correctChars, $activeChar])
+                : setMissedChars([...$missedChars, $activeChar])
         } else if (key === SPACE_CHAR_ASCII) {
             const keyIsCorrect = $activeChar.character === SPACE_CHAR_ASCII
                 || $activeChar.character === NON_BREAKING_SPACE_HTML  // may change which space char = space in `textSource`, hence the OR
-            if (keyIsCorrect) {
-                console.log('🟩')
-                setCorrectChars([...$correctChars, $activeChar])
-            } else {
-                console.log('🟥')
-                setMissedChars([...$missedChars, $activeChar])
-            }
-            if (!incrementActiveCharId(1)) {
-                setTestComplete(true)
-                return
-            }
+            keyIsCorrect
+                ? setCorrectChars([...$correctChars, $activeChar])
+                : setMissedChars([...$missedChars, $activeChar])
         } else if (key === 'Enter') {
             const keyIsCorrect = $activeChar.character === '\n'
-            if (keyIsCorrect) {
-                console.log('🟩')
-                setCorrectChars([...$correctChars, $activeChar])
-            } else {
-                console.log('🟥')
-                setMissedChars([...$missedChars, $activeChar])
-            }
-            if (!incrementActiveCharId(1)) {
-                setTestComplete(true)
-                return
-            }
+            keyIsCorrect
+                ? setCorrectChars([...$correctChars, $activeChar])
+                : setMissedChars([...$missedChars, $activeChar])
         } else if (key === 'Tab') {
             const nextChars = nextTabWidthChars()
             const nextCharacters = nextChars.map(char => char.character).join('')
             const keyIsCorrect = nextCharacters === TAB
-            if (keyIsCorrect) {
-                console.log('🟩')
-                setCorrectChars([...$correctChars, ...nextChars])
-            } else {
-                console.log('🟥')
-                setMissedChars([...$missedChars, ...nextChars])
-            }
-            if (!incrementActiveCharId(TAB_WIDTH)) {
-                setTestComplete(true)
-                return
-            }
+            keyIsCorrect
+                ? setCorrectChars([...$correctChars, ...nextChars])
+                : setMissedChars([...$missedChars, ...nextChars])
+        } else {
+            return  // don't respond to keys not denoted above
         }
+
+        incrementActiveCharId(key === 'Tab' ? TAB_WIDTH : 1)
     }
 
     function incrementActiveCharId(amount) {
@@ -262,16 +238,20 @@ function newChar(character, id, lineIndex, charIndex) {
 THOUGHTS
 
 LEAVING OFF HERE:
-    need to find a way to deal with user correcting missed keys
-    idea: keep another state array of fixedChars
-        - to set status of char
-            - if in fixedChars, status = fixed (apply correct class)
-            - else
-                - if in missedChars, status = missed
-                - else if in correctChars, status = correct
-                - else, status = null
-        - to calculate score
-            - correctChars.length / textSource.length
+    - need to find a way to deal with user correcting missed keys
+        - idea: keep another state array of fixedChars
+            - to set status of char
+                - if in fixedChars, status = fixed (apply correct class)
+                - else
+                    - if in missedChars, status = missed
+                    - else if in correctChars, status = correct
+                    - else, status = null
+            - to calculate score
+                - correctChars.length / textSource.length
+
+                
+TODO:
+    - [ ] LEAVING OFF HERE above 
 
 
 TODO FIXES:

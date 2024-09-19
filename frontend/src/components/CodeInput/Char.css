@@ -13,16 +13,20 @@
 .char.correct {
 	color: var(--char-color-correct);
 	color: var(--char-color-correct);
-	text-shadow: 3px 3px 3px black;
 }
 
 .char.wrong {
-	color: var(--char-color-wrong)
+	color: var(--char-color-wrong);
+}
+
+.char.correct,
+.char.wrong {
+	text-shadow: .05rem .05rem .1rem black;
 }
 
 .char.active {
-	border-bottom: .2rem solid;
-	border-color: var(--char-color-default)
+	border-bottom: 0.2rem solid;
+	border-color: var(--char-color-default);
 }
 
 .char.faded {
