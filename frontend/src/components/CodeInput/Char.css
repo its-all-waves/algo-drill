@@ -17,20 +17,20 @@
 
 .char.correct {
 	color: var(--char-color-correct);
-	color: var(--char-color-correct);
 }
 
 .char.missed {
 	color: var(--char-color-wrong);
 }
 
-.char.correct,
-.char.missed {
-	text-shadow: .05rem .05rem .1rem black;
-}
-
 .char.fixed {
 	color: var(--char-color-fixed);
+}
+
+.char.correct,
+.char.missed,
+.char.fixed {
+	text-shadow: .05rem .05rem .1rem black;
 }
 
 .char.active {

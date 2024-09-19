@@ -13,6 +13,11 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+html {
+	color: rgba(255, 255, 255, 0.87);
+	background-color: #242424;
+}
+
 a {
 	font-weight: 500;
 	color: #646cff;
@@ -29,11 +34,6 @@ a:hover {
 	min-width: 320px;
 	min-height: 100vh;
 } */
-
-body {
-	color: rgba(255, 255, 255, 0.87);
-	background-color: #242424;
-}
 
 h1 {
 	font-size: 3.2em;

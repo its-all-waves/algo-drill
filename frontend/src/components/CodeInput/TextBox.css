@@ -1,18 +1,20 @@
 :root {
 	--line-width-chars: 80;
 	--text-box-font-size: calc(100vw / var(--line-width-chars));
-	--text-box-bg: #00000046;
+	--text-box-bg: hsla(0, 0%, 0%, 0.615);
 }
 
 .text-box {
+	position: absolute;
+	inset: 1rem;
 	font-size: var(--text-box-font-size);
-	width: 100%;
 	overflow: scroll;
-	border: 1px solid white;
+	border: 2px solid white;
 	border-radius: 0.5rem;
 	padding: 1rem;
 
-	background: var(--text-box-bg)
+	background: var(--text-box-bg);
+	box-shadow: 0 0 1rem rgba(0, 0, 0, 0.578);
 }
 
 .text-box:focus {
