@@ -1,8 +1,8 @@
 import './Line.css'
 
-export default function Line({ children, id = -1}) {
+export default function Line({ lineId, children}) {
 	return <>
-        <div id={'line-'+id} className="line">
+        <div className="line" data-line-id={lineId}>
             {children}
         </div>
     </>

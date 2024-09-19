@@ -1,6 +1,6 @@
 :root {
 	--char-color-default: hsl(252, 100%, 86%);
-	--char-color-correct: #00ffb7;
+	--char-color-correct: white;
 	--char-color-wrong: #c10060;
 }
 
@@ -12,7 +12,8 @@
 
 .char.correct {
 	color: var(--char-color-correct);
-	color: green;
+	color: var(--char-color-correct);
+	text-shadow: 3px 3px 3px black;
 }
 
 .char.wrong {

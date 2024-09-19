@@ -1,21 +1,19 @@
 import './Char.css'
 
 export default function Char({
-    children, 
-    id = -1,
-    charNumber,
+    charId,
+    status,
     active = false, 
-    wrong = false,
-    correct = false,
-    isControlChar = false
+    controlChar = false,
+    children
 }) {
-    if (wrong && correct) throw new Error("Can't be wrong and right!")
     let classes = 'char'
     if (active) classes += ' active'
-    if (correct) classes += ' correct'
-    if (wrong) classes += ' wrong'
-    if (isControlChar) classes += ' faded'
+    if (status) classes += ` ${status}` 
+    if (controlChar) classes += ' faded'
     return (
-        <span id={'char-'+id} className={classes} data-char-number={charNumber}>{children}</span>
+        <span className={classes} data-char-id={charId}>
+            {children}
+        </span>
     )
 s}

@@ -23,60 +23,48 @@ root.style.setProperty('--line-width-chars', LINE_WIDTH_CHARS_COUNT)
 
 export default function App() {
 
-    const [textSource, linesOfText] = prepared(
+    // const { textSource, linesOfText, charLinesArray } = dataStructuresFromTextSource(
+    //     `for:
+    // hello`
+    // )
+    const { textSource, linesOfText, charLinesArray } = dataStructuresFromTextSource(
         `for:
     thingy = 42
     print(thingy)`
     )
-    const lineCount = linesOfText.length
+    const lineCount = charLinesArray.length
 
     // STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    const [$testComplete, setTestComplete] = useState(false)
-    const [$currLineIndex, setCurrLineIndex] = useState(0)
-    const [$currCharIndex, setCurrCharIndex] = useState(0)
-
-    const [$correctKeys, setCorrectKeys] = useState([])
+    const [$activeCharId, setActiveCharId] = useState(0)
+    
+    const [$correctChars, setCorrectChars] = useState([])
     const [$missedChars, setMissedChars] = useState([])
-
+    
+    const [$testComplete, setTestComplete] = useState(false)
+    
     // DERIVED STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    let $activeLineId = lineId($currLineIndex)
-
+    let $activeChar = charWith($activeCharId)
     useEffect(() => {
-        $activeLineId = lineId($currLineIndex)
-    }, [$currLineIndex])
-
-    let $currentChar = textSource[0]
-
-    useEffect(() => {
-        $currentChar = linesOfText[$currLineIndex][$currCharIndex]
-    }, [$currCharIndex])
-
-    // let stats = {
-    //     percentCorrect: 0 * 100,
-    // }
-
-    // useEffect(() => {  
-    //     stats.percentCorrect = correctKeys.length / highestCharNumberReached === NaN ? 0 : correctKeys.length / highestCharNumberReached * 100
-    //     console.log('- - - - percent correct : missed = ', `${stats.percentCorrect}%  :  ${missedChars.length}`)
-    // }, [testComplete, charIndex])
+        if (!$activeChar) setTestComplete(true)
+    }, [$activeCharId])
 
     // END STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     // DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     useEffect(() => {
-        console.log('updated active coords: ', $currLineIndex, $currCharIndex)
-    }, [$currCharIndex, $currLineIndex])
+        if ($testComplete) console.log('* * * TEST COMPLETE * * *')
+    }, [$testComplete])
 
     // useEffect(() => {
-    //     console.log(': : : : : : char: ', linesOfText[lineIndex][charIndex - 1])
-    // }, [charIndex])
+    //     console.log('$activeCharId: ', $activeCharId)
+    // }, [$activeCharId])
 
-    useEffect(() => {
-        console.log('correct keys: ', $correctKeys)
-    }, [$correctKeys])
+    // useEffect(() => {
+    //     console.log('correct keys: ', $correctKeys)
+    // }, [$correctKeys])
 
     useEffect(() => {
         console.log('missed keys: ', $missedChars)
@@ -84,35 +72,38 @@ export default function App() {
 
     // END DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    let charNumber = 0
-
     return <>
         <div style={{ margin: '1rem' }}>
             <TextBox onKeyDown={onKeyDown}>
-                {linesOfText.map((line, lineIndex) => {
-                    return (
-                        <Line key={lineIndex} id={lineId(lineIndex)}>
-                            {[...line].map((char, charIndex) => {
-                                const id = charId(lineIndex, charIndex)
-                                return (
+                {charLinesArray.map((line, lineIndex) => {
+                    const lineComponent = (
+                        <Line key={lineIndex} lineId={lineIndex}>
+                            {line.map((char) => {
+                                const { character, id } = char
+                                const charComponent = (
                                     <Char
                                         key={id}
-                                        id={id}
-                                        active={id === charId($currLineIndex,
-                                            $currCharIndex)}
-                                        isControlChar={char === '\n'}
-                                        charNumber={charNumber++}
+                                        charId={id}
+                                        status={charArrayIncludes($missedChars, id)
+                                            ? 'wrong'
+                                            : charArrayIncludes($correctChars, id)
+                                                ? 'correct'
+                                                : null}
+                                        active={id === $activeCharId}
+                                        controlChar={character === '\n'}
                                     >
-                                        {char === ' '
+                                        {character === ' '
                                             ? NON_BREAKING_SPACE_UNICODE
-                                            : char === '\n'
+                                            : character === '\n'
                                                 ? '⏎'
-                                                : char}
+                                                : character}
                                     </Char>
                                 )
+                                return charComponent
                             })}
                         </Line>
                     )
+                    return lineComponent
                 })}
             </TextBox>
         </div>
@@ -129,161 +120,162 @@ export default function App() {
         if (!keyCanPrint) return
 
         if (key === 'Backspace') {
-            decrementCharIndex(prevTabWidthChars() === TAB ? TAB_WIDTH : 1)
+            const prevCharacters = 
+                prevTabWidthChars()?.map(char => char.character).join('')
+            decrementCharIndex(prevCharacters === TAB ? TAB_WIDTH : 1)
             return
         }
 
         // DEBUG
-        console.log(':::::: char: ', $currentChar)
+        // console.log(':::::: char: ', $activeChar.character)
 
         const keyIsSourceCodeChar = SRC_CODE_CHARS.includes(key)
         if (keyIsSourceCodeChar) {
-            const keyIsCorrect = $currentChar === key
+            const keyIsCorrect = $activeChar.character === key
             if (keyIsCorrect) {
                 console.log('🟩')
-                setCorrectKeys([...$correctKeys, $currentChar])
+                setCorrectChars([...$correctChars, $activeChar])
             } else {
                 console.log('🟥')
-                setMissedChars([...$missedChars, $currentChar])
+                setMissedChars([...$missedChars, $activeChar])
             }
-            if (!incrementCharIndex(1)) {
+            if (!incrementActiveCharId(1)) {
                 setTestComplete(true)
                 return
             }
         } else if (key === SPACE_CHAR_ASCII) {
-            const keyIsCorrect = $currentChar === SPACE_CHAR_ASCII
-                || $currentChar === NON_BREAKING_SPACE_HTML  // may change which space char = space in `textSource`, hence the OR
+            const keyIsCorrect = $activeChar.character === SPACE_CHAR_ASCII
+                || $activeChar.character === NON_BREAKING_SPACE_HTML  // may change which space char = space in `textSource`, hence the OR
             if (keyIsCorrect) {
                 console.log('🟩')
-                setCorrectKeys([...$correctKeys, 'Space'])
+                setCorrectChars([...$correctChars, $activeChar])
             } else {
                 console.log('🟥')
-                setMissedChars([...$missedChars, 'Space'])
+                setMissedChars([...$missedChars, $activeChar])
             }
-            if (!incrementCharIndex(1)) {
+            if (!incrementActiveCharId(1)) {
                 setTestComplete(true)
                 return
             }
         } else if (key === 'Enter') {
-            const keyIsCorrect = $currentChar === '\n'
+            const keyIsCorrect = $activeChar.character === '\n'
             if (keyIsCorrect) {
                 console.log('🟩')
-                setCorrectKeys([...$correctKeys, key])
+                setCorrectChars([...$correctChars, $activeChar])
             } else {
                 console.log('🟥')
-                setMissedChars([...$missedChars, key])
+                setMissedChars([...$missedChars, $activeChar])
             }
-            if (!incrementCharIndex(1)) {
+            if (!incrementActiveCharId(1)) {
                 setTestComplete(true)
                 return
             }
         } else if (key === 'Tab') {
             const nextChars = nextTabWidthChars()
-            const keyIsCorrect = nextChars === TAB
-            const tabAsSpaces = TAB.split('')
+            const nextCharacters = nextChars.map(char => char.character).join('')
+            const keyIsCorrect = nextCharacters === TAB
             if (keyIsCorrect) {
                 console.log('🟩')
-                setCorrectKeys([...$correctKeys, ...tabAsSpaces])
+                setCorrectChars([...$correctChars, ...nextChars])
             } else {
                 console.log('🟥')
-                setMissedChars([...$missedChars, ...tabAsSpaces])
+                setMissedChars([...$missedChars, ...nextChars])
             }
-            if (!incrementCharIndex(TAB_WIDTH)) {
+            if (!incrementActiveCharId(TAB_WIDTH)) {
                 setTestComplete(true)
                 return
             }
         }
     }
 
-    /** Returns `null` if on the last character, or [nextLineIndex, nextCharIndex] if did increment */
-    function incrementCharIndex(amount) {
-        const nextLineIndex = $currLineIndex + 1
-        if (nextLineIndex > lineCount) throw new Error(`Incrementing the line index by "${amount}" results in an out of range index`)
-
-        const activeLineLength = linesOfText[$currLineIndex].length
-        const nextCharIndex = $currCharIndex + amount
-        const incrementIsTooLarge = nextCharIndex > activeLineLength
-        if (incrementIsTooLarge) throw new Error(`Incrementing the line index by "${amount}" results in an out of range index`)
-
-        const onLastLine = $currLineIndex === lineCount - 1
-        const atEndOfLine = $currCharIndex === activeLineLength - 1
-        const onLastChar = onLastLine && atEndOfLine
-        if (onLastChar) return null
-
-        setCurrCharIndex(atEndOfLine ? 0 : nextCharIndex)
-        if (atEndOfLine && !onLastLine) setCurrLineIndex(nextLineIndex)
-
-        return [nextLineIndex, nextCharIndex]
+    function incrementActiveCharId(amount) {
+        const nextIdOutOfRange = $activeCharId + amount > textSource.length
+        if (nextIdOutOfRange) return false
+        setActiveCharId($activeCharId + amount)
+        return true
     }
 
     function decrementCharIndex(amount) {
-        amount = Math.abs(amount)
-
-        const atStartOfLine = $currCharIndex === 0
-        const onFirstLine = $currLineIndex === 0
-        const onFirstChar = onFirstLine && atStartOfLine
-        if (onFirstChar) return null
-
-
-        let prevCharIndex = -1
-        if (!atStartOfLine) {
-            prevCharIndex = $currCharIndex - amount
-            setCurrCharIndex(prevCharIndex)
-        } else {
-            // get index of end of prev line
-            const lastCharOnPrevLineIndex = linesOfText[$currLineIndex - 1].length - 1
-            setCurrCharIndex(lastCharOnPrevLineIndex)
-        }
-
-        let outputLineIndex = $currLineIndex
-        if (atStartOfLine && !onFirstLine) {
-            outputLineIndex = $currLineIndex - 1
-            setCurrLineIndex(outputLineIndex)
-        }
-
-        return [outputLineIndex, prevCharIndex]
+        const prevIdOutOfRange = $activeCharId - amount < 0
+        if (prevIdOutOfRange) return false
+        setActiveCharId($activeCharId - amount)
+        return true
     }
 
-    /** Returns the next `TAB_WIDTH` chars from `linesOfText` */
     function nextTabWidthChars() {
+        const { charIndex, lineIndex } = $activeChar
         const lineIsShorterThanTabWidth =
-            linesOfText[$currLineIndex].length < TAB_WIDTH
+            charLinesArray[lineIndex].length < TAB_WIDTH
         if (lineIsShorterThanTabWidth) return null
-
-        return linesOfText[$currLineIndex]
-            .substring($currCharIndex, $currCharIndex + TAB_WIDTH)
+        return charLinesArray[lineIndex].slice(charIndex, charIndex + TAB_WIDTH)
     }
 
     function prevTabWidthChars() {
-        // if less than 4 ahead of start of line
-        if ($currCharIndex < 3) return null
-
-        return linesOfText[$currLineIndex]
-            .substring($currCharIndex - 4, $currCharIndex)
+        const { charIndex, lineIndex } = $activeChar
+        if (charIndex < 3) return null
+        return charLinesArray[lineIndex].slice(charIndex - 4, charIndex)
     }
 
-    function activeCharNumber() {
-        const activeChar = document.querySelectorAll('.char.active')[0]
-        const activeCharNumber = activeChar.dataset.charNumber
-        return +activeCharNumber
+    function charWith(id) {
+        for (let lineIndex = 0; lineIndex < lineCount; lineIndex++) {
+            const char = charLinesArray[lineIndex].find(char => char.id === id)
+            if (char) return char
+        }
+        return null
+    }
+
+    function charArrayIncludes(charArray, charId) {
+        for (let i = 0; i < charArray.length; i++) {
+            const missedChar = charArray[i]
+            if (missedChar.id === charId) return missedChar
+        }
+        return null
     }
 }
 
-function charId(lineIndex, charIndex) {
-    return `char-${lineIndex}-${charIndex}`
-}
-
-function lineId(lineIndex) {
-    return `line-${lineIndex}`
-}
-
-/** TODO: move to backend? 
- * @returns {Array<string>} 
+/** TODO: move text treatment to backend? 
  * @param {string} textSource
 */
-function prepared(textSource) {
+function dataStructuresFromTextSource(textSource) {
+    // treat text source
     if (!textSource.endsWith('\n')) textSource += '\n'
     textSource = textSource.replace(/\t/g, TAB)
-    const asLines = textSource.split(/(?<=\n)/)  // keep the \n at end of line
-    return [textSource, asLines]
+
+    // map text to a 2d array of chars -> [line[char]]
+    const linesOfText = textSource.split(/(?<=\n)/)  // keep the \n at end of line
+    let charId = 0
+    const charLinesArray = linesOfText.map((line, lineIndex) => {
+        return [...line].map((character, charIndex) => {
+            return newChar(character, charId++, lineIndex, charIndex)
+        })
+    })
+
+    return { textSource, charLinesArray }
 }
+
+function newChar(character, id, lineIndex, charIndex) {
+    return { character, id, lineIndex, charIndex }
+}
+
+
+/* 
+THOUGHTS
+
+LEAVING OFF HERE:
+    need to find a way to deal with user correcting missed keys
+    idea: keep another state array of fixedChars
+        - to set status of char
+            - if in fixedChars, status = fixed (apply correct class)
+            - else
+                - if in missedChars, status = missed
+                - else if in correctChars, status = correct
+                - else, status = null
+        - to calculate score
+            - correctChars.length / textSource.length
+
+
+TODO FIXES:
+    - when backspace from beginning of a line, 
+    skip the prev line's last char (\n)
+            
+*/
