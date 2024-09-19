@@ -7,7 +7,7 @@
 .char {
 	color: var(--char-color-default);
 	text-align: center;
-	padding-bottom: 0.1rem; /* push the border / 'underline' down a bit */
+	padding-bottom: 0.2rem; /* push the border / 'underline' down a bit */
 }
 
 .char.correct {
@@ -25,7 +25,14 @@
 }
 
 .char.active {
-	border-bottom: 0.2rem solid;
+	position: relative;
+}
+
+.char.active::before {
+	position: absolute;
+	content: '';
+	inset: 0;
+	border-bottom: 0.15rem solid;
 	border-color: var(--char-color-default);
 }
 

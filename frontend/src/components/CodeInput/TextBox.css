@@ -4,7 +4,6 @@
 	--text-box-bg: #00000046;
 }
 
-
 .text-box {
 	font-size: var(--text-box-font-size);
 	width: 100%;
@@ -18,6 +17,7 @@
 
 .text-box:focus {
 	outline: 0.1rem solid rgba(255, 255, 255, 0.762);	
+	box-shadow: 0rem 0rem .75rem rgba(255, 255, 255, 0.691);
 }
 
 ::-webkit-scrollbar {
