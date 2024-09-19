@@ -138,12 +138,15 @@ export default function App() {
 
     function onKeyDown(event) {
         event.preventDefault()
+
+        if ($testComplete) return
+        
         const { key } = event
 
         if (key === 'Backspace') {
             const prevCharacters =
                 prevTabWidthChars()?.map(char => char.character).join('')
-            decrementCharIndex(prevCharacters === TAB ? TAB_WIDTH : 1)
+            decrementActiveCharId(prevCharacters === TAB ? TAB_WIDTH : 1)
             return
         }
 
@@ -155,56 +158,26 @@ export default function App() {
         const keyIsSourceCodeChar = SRC_CODE_CHARS.includes(key)
         if (keyIsSourceCodeChar) {
             const keyIsCorrect = $activeChar.character === key
-            handleKeyCorrectness(keyIsCorrect)
+            setSingleCharStatus(keyIsCorrect)
+
         } else if (key === SPACE_CHAR_ASCII) {
             const keyIsCorrect = $activeChar.character === SPACE_CHAR_ASCII
                 || $activeChar.character === NON_BREAKING_SPACE_HTML  // may change which space char = space in `textSource`, hence the OR
-            handleKeyCorrectness(keyIsCorrect)
+            setSingleCharStatus(keyIsCorrect)
+
         } else if (key === 'Enter') {
             const keyIsCorrect = $activeChar.character === '\n'
-            handleKeyCorrectness(keyIsCorrect)
+            setSingleCharStatus(keyIsCorrect)
+
         } else if (key === 'Tab') {
-            const [nextChars, nextCharsIds] = nextTabWidthChars()
+            const nextChars = nextTabWidthChars()
             const nextCharacters = nextChars.map(char => char.character).join('')
             const keyIsCorrect = nextCharacters === TAB
-            // keyIsCorrect
-            //     ? setCorrectChars([...$correctChars, ...nextChars])
-            //     : setMissedChars([...$missedChars, ...nextChars])
-            debugger
-            if (keyIsCorrect) {
-                if (charArrayIncludes($missedChars, nextCharsIds)) {
-                    setMissedChars(
-                        $fixedChars.filter(c => !nextCharsIds.includes(c.id))
-                    )
-                    setFixedChars([...$fixedChars, ...nextChars])
-                } else if (charArrayIncludes($correctChars, nextCharsIds)) {
-                    // do nothing
-                } else if (charArrayIncludes($fixedChars, nextCharsIds)) {
-                    // do nothing
-                } else {
-                    setCorrectChars([...$correctChars, ...nextChars])
-                }
-            } else if (!keyIsCorrect) {
-                if (charArrayIncludes($missedChars, nextCharsIds)) {
-                    // do nothing
-                } else if (charArrayIncludes($correctChars, nextCharsIds)) {
-                    setCorrectChars(
-                        $fixedChars.filter(c => !nextCharsIds.includes(c.id))
-                    )
-                    setFixedChars([...$fixedChars, ...nextChars])
-                } else if (charArrayIncludes($fixedChars, nextCharsIds)) {
-                    setFixedChars(
-                        $fixedChars.filter(c => !nextCharsIds.includes(c.id))
-                    )
-                    setMissedChars([...$missedChars, ...nextChars])
-                } else {
-                    setMissedChars([...$missedChars, ...nextChars])
-                }
-            }
+            setTabWidthCharsStatus(keyIsCorrect, nextChars)
         } else {
             return  // don't respond to keys not denoted above
         }
-
+        
         incrementActiveCharId(key === 'Tab' ? TAB_WIDTH : 1)
     }
 
@@ -215,7 +188,7 @@ export default function App() {
         return true
     }
 
-    function decrementCharIndex(amount) {
+    function decrementActiveCharId(amount) {
         const prevIdOutOfRange = $activeCharId - amount < 0
         if (prevIdOutOfRange) return false
         setActiveCharId($activeCharId - amount)
@@ -227,11 +200,8 @@ export default function App() {
         const lineIsShorterThanTabWidth =
             charLinesArray[lineIndex].length < TAB_WIDTH
         if (lineIsShorterThanTabWidth) return null
-
-        const nextChars = charLinesArray[lineIndex]
+        return charLinesArray[lineIndex]
             .slice(charIndex, charIndex + TAB_WIDTH)
-        const nextCharsIds = nextChars.map(c => c.id)
-        return [nextChars, nextCharsIds]
     }
 
     function prevTabWidthChars() {
@@ -252,10 +222,12 @@ export default function App() {
         debugger
 
         if (charIdOrSequentialIds instanceof Array) {
-            // passed an array of contiguous ids
+            // passed an array of ids
             const charIds = charIdOrSequentialIds
-            const charsWithGivenIds = charArray.filter(c => charIds.includes(c.id))
-            if (charsWithGivenIds.length > charIds.length) return true
+            const charsWithGivenIds = 
+                charArray.filter(c => charIds.includes(c.id))
+            const allIdsAreInArray = charsWithGivenIds.length === charIds.length
+            if (allIdsAreInArray) return true
             return false
             // for (const char of charsWithGivenIds) {
             //     if (!charArrayIncludes(charsWithGivenIds, char)) return false
@@ -272,7 +244,7 @@ export default function App() {
         return false
     }
 
-    function handleKeyCorrectness(keyIsCorrect) {
+    function setSingleCharStatus(keyIsCorrect) {
         if (keyIsCorrect) {
             const charPreviouslyCorrect =
                 charArrayIncludes($correctChars, $activeCharId)
@@ -333,10 +305,76 @@ export default function App() {
         }
     }
 
+    function setTabWidthCharsStatus(keyIsCorrect, nextTabWidthChars) {
+        const nextCharsIds = nextTabWidthChars.map(c => c.id)
+
+        if (keyIsCorrect) {
+            const charPreviouslyCorrect =
+                charArrayIncludes($correctChars, nextCharsIds)
+            const charPreviouslyFixed =
+                charArrayIncludes($fixedChars, nextCharsIds)
+            if (charPreviouslyCorrect || charPreviouslyFixed) {
+                return  // do nothing
+            }
+
+            const charPreviouslyMissed =
+                charArrayIncludes($missedChars, nextCharsIds)
+            if (charPreviouslyMissed) {
+                // move to fixed chars
+                setMissedChars(
+                    $missedChars.filter(c => !nextCharsIds.includes(c.id))
+                )
+                setFixedChars([...$fixedChars, ...nextTabWidthChars])
+                return
+            }
+
+            // first time hitting char
+            setCorrectChars([...$correctChars, ...nextTabWidthChars])
+            return
+        }
+
+        if (!keyIsCorrect) {
+            const charPreviouslyCorrect =
+                charArrayIncludes($correctChars, nextCharsIds)
+            if (charPreviouslyCorrect) {
+                // move to missed chars
+                setCorrectChars(
+                    $correctChars.filter(c => !nextCharsIds.includes(c.id))
+                )
+                setMissedChars([...$missedChars, ...nextTabWidthChars])
+                return
+            }
+
+            const charPreviouslyMissed =
+                charArrayIncludes($missedChars, nextCharsIds)
+            if (charPreviouslyMissed) {
+                return  // do nothing
+            }
+
+            const charPreviouslyFixed =
+                charArrayIncludes($fixedChars, nextCharsIds)
+            if (charPreviouslyFixed) {
+                // move to missed chars
+                setFixedChars(
+                    $fixedChars.filter(c => !nextCharsIds.includes(c.id))
+                )
+                setMissedChars([...$missedChars, ...nextTabWidthChars])
+                return
+            }
+
+            // first time hitting char
+            setMissedChars([...$missedChars, ...nextTabWidthChars])
+            return
+        }     
+    }
+
     // END METHODS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 }
 
-/** TODO: move text treatment to backend? 
+/** TODO: move text treatment to backend? \
+ * Returns the an object containing the text source after treatment, 
+ * along with a 2d array of lines>chars with char id's mapping to 
+ * text source indices
  * @param {string} textSource
 */
 function dataStructuresFromTextSource(textSource) {
@@ -365,16 +403,7 @@ function newChar(character, id, lineIndex, charIndex) {
 THOUGHTS
 
 LEAVING OFF HERE:
-    - need to find a way to deal with user correcting missed keys
-        - idea: keep another state array of fixedChars
-            - to set status of char
-                - if in fixedChars, status = fixed (apply correct class)
-                - else
-                    - if in missedChars, status = missed
-                    - else if in correctChars, status = correct
-                    - else, status = null
-            - to calculate score
-                - correctChars.length / textSource.length
+
 
 HOW TO HANDLE FIXED CHARS
     - if typed CORRECT key
@@ -392,7 +421,8 @@ HOW TO HANDLE FIXED CHARS
     - ONCE WE KNOW THIS WORKS, CONVERT THE CHAR STATUS ARRAYS INTO ARRAYS OF IDS ONLY
 
 TODO:
-    - [ ] LEAVING OFF HERE above 
+    - [ ] find a way to add keyPressed to missed keys
+    - [ ] 
 
 
 TODO FIXES:
