@@ -1,0 +1,27 @@
+:root {
+	--line-width-chars: 80;
+	--text-box-font-size: calc(100vw / var(--line-width-chars));
+	--text-box-bg: hsla(0, 0%, 0%, 0.615);
+}
+
+.text-box {
+	position: absolute;
+	inset: 1rem;
+	font-size: var(--text-box-font-size);
+	overflow: scroll;
+	border: 2px solid white;
+	border-radius: 0.5rem;
+	padding: 1rem;
+
+	background: var(--text-box-bg);
+	box-shadow: 0 0 1rem rgba(0, 0, 0, 0.578);
+}
+
+.text-box:focus {
+	outline: 0.1rem solid rgba(255, 255, 255, 0.762);	
+	box-shadow: 0rem 0rem .75rem rgba(255, 255, 255, 0.691);
+}
+
+::-webkit-scrollbar {
+	display: none;
+}

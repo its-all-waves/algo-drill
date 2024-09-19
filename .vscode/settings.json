@@ -1,0 +1,11 @@
+{
+    "[javascript]": {
+        // "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "javascript.format.enable": true,
+
+    "editor.tabSize": 4,
+    "cSpell.words": [
+        "Elems"
+    ],
+}
