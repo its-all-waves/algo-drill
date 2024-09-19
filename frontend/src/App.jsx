@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
-import Char from './components/CodeInput/Char'
-
-import CodeInput from './components/CodeInput/CodeInput'
-import Line from './components/CodeInput/Line'
 import TextBox from './components/CodeInput/TextBox'
+import Line from './components/CodeInput/Line'
+import Char from './components/CodeInput/Char'
 
 
 const NON_BREAKING_SPACE_UNICODE = '\u00A0'  // &nbsp; in html
@@ -16,22 +14,62 @@ const TAB = SPACE_CHAR_ASCII.repeat(TAB_WIDTH)
 
 const SRC_CODE_CHARS = "`~1!2@3#4$5%6^7&8*9(0)-_=+qQwWeErRtTyYuUiIoOpP[{]}\\|aAsSdDfFgGhHjJkKlL;:'\"zZxXcCvVbBnNmM,<.>/?"
 
-const LINE_WIDTH_CHARS_COUNT = 20
+const LINE_WIDTH_CHARS_COUNT = 40
 const root = document.querySelector(':root')
 root.style.setProperty('--line-width-chars', LINE_WIDTH_CHARS_COUNT)
 
 
 export default function App() {
 
+    const { textSource, linesOfText, charLinesArray } = dataStructuresFromTextSource(
+        `def merge(arr, left, mid, right):
+    n1 = mid - left + 1
+    n2 = right - mid
+
+    # Create temp arrays
+    L = [0] * n1
+    R = [0] * n2
+
+    # Copy data to temp arrays L[] and R[]
+    for i in range(n1):
+        L[i] = arr[left + i]
+    for j in range(n2):
+        R[j] = arr[mid + 1 + j]
+
+    i = 0  # Initial index of first subarray
+    j = 0  # Initial index of second subarray
+    k = left  # Initial index of merged subarray
+
+    # Merge the temp arrays back
+    # into arr[left..right]
+    while i < n1 and j < n2:
+        if L[i] <= R[j]:
+            arr[k] = L[i]
+            i += 1
+        else:
+            arr[k] = R[j]
+            j += 1
+        k += 1
+
+    # Copy the remaining elements of L[],
+    # if there are any
+    while i < n1:
+        arr[k] = L[i]
+        i += 1
+        k += 1
+
+    # Copy the remaining elements of R[], 
+    # if there are any
+    while j < n2:
+        arr[k] = R[j]
+        j += 1
+        k += 1`
+    )
     // const { textSource, linesOfText, charLinesArray } = dataStructuresFromTextSource(
     //     `for:
-    // hello`
+    // thingy = 42
+    // print(thingy)`
     // )
-    const { textSource, linesOfText, charLinesArray } = dataStructuresFromTextSource(
-        `for:
-    thingy = 42
-    print(thingy)`
-    )
     const lineCount = charLinesArray.length
 
     // STATE VARS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -94,14 +132,14 @@ export default function App() {
     // MARKUP ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     return <>
-        <div style={{ margin: '1rem' }}>
+        <div style={{ position: 'relative', height: '100dvh' }}>
             <TextBox onKeyDown={onKeyDown}>
                 {charLinesArray.map((line, lineIndex) => {
-                    const lineComponent = (
+                    return (
                         <Line key={lineIndex} lineId={lineIndex}>
                             {line.map((char) => {
                                 const { character, id } = char
-                                const charComponent = (
+                                return (
                                     <Char
                                         key={id}
                                         charId={id}
@@ -122,11 +160,9 @@ export default function App() {
                                                 : character}
                                     </Char>
                                 )
-                                return charComponent
                             })}
                         </Line>
                     )
-                    return lineComponent
                 })}
             </TextBox>
         </div>
@@ -423,6 +459,7 @@ HOW TO HANDLE FIXED CHARS
 
 TODO:
     - [X] find a way to add keyPressed to missed keys
+    - [ ] 💀 daaaaamnn -- must remember last line's tab depth and recall it on next line
     - [ ] 💀 deal with scrolling the text if it doesn't fit in the window
 
 
