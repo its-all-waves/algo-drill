@@ -265,41 +265,37 @@ export default function App() {
                 return
             }
 
-            // first time hitting char
+            // first time hitting char -> add to correct chars
             setCorrectChars([...$correctChars, $activeChar])
             return
         }
 
         if (!keyIsCorrect) {
-            const charPreviouslyCorrect =
-                charArrayIncludes($correctChars, $activeCharId)
-            if (charPreviouslyCorrect) {
-                // move to missed chars
-                setCorrectChars(
-                    $correctChars.filter(c => c.id !== $activeCharId)
-                )
-                setMissedChars([...$missedChars, $activeChar])
-                return
-            }
-
             const charPreviouslyMissed =
                 charArrayIncludes($missedChars, $activeCharId)
             if (charPreviouslyMissed) {
                 return  // do nothing
             }
 
+            const charPreviouslyCorrect =
+                charArrayIncludes($correctChars, $activeCharId)
+            if (charPreviouslyCorrect) {
+                // remove from correct chars...
+                setCorrectChars(
+                    $correctChars.filter(c => c.id !== $activeCharId)
+                )
+            }
+
             const charPreviouslyFixed =
                 charArrayIncludes($fixedChars, $activeCharId)
             if (charPreviouslyFixed) {
-                // move to missed chars
+                // remove from fixed chars...
                 setFixedChars(
                     $fixedChars.filter(c => c.id !== $activeCharId)
                 )
-                setMissedChars([...$missedChars, $activeChar])
-                return
             }
 
-            // first time hitting char
+            // ...add to missed chars
             setMissedChars([...$missedChars, $activeChar])
             return
         }
@@ -334,35 +330,31 @@ export default function App() {
         }
 
         if (!keyIsCorrect) {
-            const charPreviouslyCorrect =
-                charArrayIncludes($correctChars, nextCharsIds)
-            if (charPreviouslyCorrect) {
-                // move to missed chars
-                setCorrectChars(
-                    $correctChars.filter(c => !nextCharsIds.includes(c.id))
-                )
-                setMissedChars([...$missedChars, ...nextTabWidthChars])
-                return
-            }
-
             const charPreviouslyMissed =
                 charArrayIncludes($missedChars, nextCharsIds)
             if (charPreviouslyMissed) {
                 return  // do nothing
             }
 
+            const charPreviouslyCorrect =
+                charArrayIncludes($correctChars, nextCharsIds)
+            if (charPreviouslyCorrect) {
+                // remove from correct chars...
+                setCorrectChars(
+                    $correctChars.filter(c => !nextCharsIds.includes(c.id))
+                )
+            }
+
             const charPreviouslyFixed =
                 charArrayIncludes($fixedChars, nextCharsIds)
             if (charPreviouslyFixed) {
-                // move to missed chars
+                // remove from fixed chars...
                 setFixedChars(
                     $fixedChars.filter(c => !nextCharsIds.includes(c.id))
                 )
-                setMissedChars([...$missedChars, ...nextTabWidthChars])
-                return
             }
 
-            // first time hitting char
+            // ...add to missed chars
             setMissedChars([...$missedChars, ...nextTabWidthChars])
             return
         }     
@@ -422,7 +414,7 @@ HOW TO HANDLE FIXED CHARS
 
 TODO:
     - [ ] find a way to add keyPressed to missed keys
-    - [ ] 
+    - [ ] 💀 deal with scrolling the text if it doesn't fit in the window
 
 
 TODO FIXES:
