@@ -1,0 +1,46 @@
+:root {
+	--main-menu-chars-per-line: 30;
+	--main-menu-font-size: clamp(2rem, calc(100vw / var(--main-menu-chars-per-line) + 1rem), 3rem);
+}
+
+#main-menu {
+	position: relative;
+	height: 100dvh;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: calc(var(--main-menu-font-size) * 1.5);
+
+	text-align: center;
+	font-size: var(--main-menu-font-size);
+
+	background: black;
+}
+
+#main-menu .button {
+	position: relative;
+	background: none;
+	padding: 0;
+}
+
+#main-menu .button:active {
+	/* border-top: 3px solid red; */
+}
+
+#main-menu .button:hover::before {
+	content: '';
+	position: absolute;
+	inset: -1rem;
+	border-top: 3px solid purple;
+	border-left: 3px solid purple;
+}
+
+#main-menu .button:focus {
+	outline: none;
+}
+
+#main-menu .button:focus-visible {
+	outline: 4px auto -webkit-focus-ring-color;
+}

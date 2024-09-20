@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 
-import TextBox from './components/CodeInput/TextBox'
-import Line from './components/CodeInput/Line'
-import Char from './components/CodeInput/Char'
+import TextBox from './components/TextBox/TextBox'
+import Line from './components/TextBox/Line'
+import Char from './components/TextBox/Char'
 
 
 const NON_BREAKING_SPACE_UNICODE = '\u00A0'  // &nbsp; in html
