@@ -1,5 +1,7 @@
 :root {
     --site-background: linear-gradient(to right top, hsla(173, 35%, 90%, 0.667), hsla(186, 100%, 33%, 0.686), hsla(199, 100%, 36%, 0.706), hsla(208, 100%, 37%, 0.631), hsla(217, 100%, 33%, 0.725), hsla(232, 65%, 40%, 0.635), hsla(251, 64%, 40%, 0.764), hsla(270, 99%, 32%, 0.69), hsla(279, 98%, 37%, 0.615), hsla(287, 97%, 42%, 0.624), hsla(294, 97%, 46%, 0.703), hsla(300, 100%, 50%, 0.651));
+:root {
+    --site-background: linear-gradient(to right top, hsla(173, 35%, 90%, 0.667), hsla(186, 100%, 33%, 0.686), hsla(199, 100%, 36%, 0.706), hsla(208, 100%, 37%, 0.631), hsla(217, 100%, 33%, 0.725), hsla(232, 65%, 40%, 0.635), hsla(251, 64%, 40%, 0.764), hsla(270, 99%, 32%, 0.69), hsla(279, 98%, 37%, 0.615), hsla(287, 97%, 42%, 0.624), hsla(294, 97%, 46%, 0.703), hsla(300, 100%, 50%, 0.651));
 }
 
 * {
@@ -9,7 +11,7 @@
 }
 
 body {
-    font-family: monospace;
+    /* overflow-y: scroll; */
 }
 
 body::before {
@@ -19,3 +21,7 @@ body::before {
     background-image: var(--site-background);
     z-index: -100;
 }
+
+.pos-relative { position: relative; }
+
+.pos-absolute { position: absolute; }
