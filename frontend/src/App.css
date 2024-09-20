@@ -19,3 +19,7 @@ body::before {
     background-image: var(--site-background);
     z-index: -100;
 }
+
+.pos-relative { position: relative; }
+
+.pos-absolute { position: absolute; }
