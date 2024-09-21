@@ -1,0 +1,52 @@
+:root {
+	--button-border: 0.3rem solid white;
+	--button-border-radius: 1.3rem;
+	--button-thickness: .2rem;
+	
+	--button-padding-inline: 1.8rem;
+	--button-padding-block: 0.3rem;
+	--button-margin-bottom:  2rem;
+	--button-box-shadow: 0 .6rem black;
+
+	/* --button-font-size: 2.5rem; */
+	--button-font-size: clamp(1rem, 6.5vw, 3rem);
+	--button-text-shadow: 0rem var(--button-thickness) .2rem rgba(0, 0, 0, 0.584);
+}
+
+.button {
+	border: var(--button-border);
+	border-radius: var(--button-border-radius);
+	padding-inline: var(--button-padding-inline);
+	padding-block: var(--button-padding-block);
+	line-height: 3rem;
+	box-shadow: var(--button-box-shadow);
+
+	margin-bottom: var(--button-margin-bottom);
+}
+
+.button {
+	color: white;
+	font-family: inherit;
+	font-size: var(--button-font-size);
+	text-shadow: var(--button-text-shadow)
+}
+
+.bg-primary {
+	background: var(--color-primary);
+}
+
+.bg-secondary {
+	background: var(--color-secondary);
+}
+
+.button:active {
+	transform: translateY(var(--button-thickness));
+	box-shadow: none;
+}
+
+.button:focus {
+	outline: none;
+}
+.button:focus-visible {
+	outline: inherit;
+}

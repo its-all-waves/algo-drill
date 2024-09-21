@@ -1,21 +1,21 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import TextBox from './App.jsx'
-import './index.css'
 
 // DEBUG
-import MainMenu from './components/MainMenu/MainMenu'
-import './App.css'
-import GlassPane from './components/GlassPane/GlassPane.jsx'
 import App from './App.jsx'
+import './App.css'
 
+import MainMenu from './components/MainMenu/MainMenu'
+import GlassPane from './components/shared/GlassPane'
+import LandingView from './components/LandingView/LandingView'
 
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
-    // <TextBox />
-    <App/ >
-    // <MainMenu />
-    // <GlassPane />
+  // <App />
+  // <TextBox />
+  // <GlassPane />
+  // <MainMenu />
+  <LandingView />
   // </StrictMode>,
 )

@@ -3,6 +3,13 @@
 }
 
 .glass-pane {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.glass-pane {
 	position: absolute;
 	inset: 1rem;
 	/* font-size: var(--text-box-font-size); */

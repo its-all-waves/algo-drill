@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 
-import GlassPane from './components/GlassPane/GlassPane'
+import GlassPane from './components/shared/GlassPane'
 import TextBox from './components/TextBox/TextBox'
 
 

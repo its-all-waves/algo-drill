@@ -1,0 +1,54 @@
+#start-form {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	gap: 2.75em;
+}
+
+#start-form label {
+	margin-right: 1em;
+	font-size: 1.5em;
+	text-align: right !important;
+}
+
+#start-form .form-field {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+#hero-text {
+	margin-bottom: 2rem;
+
+	min-width: 250px;
+	max-width: 50em;
+
+	text-align: center;
+	font-family: 'JetBrains Mono Bold';
+
+	padding-bottom: 1em;
+}
+
+#hero-text .hero-main-wrapper {
+	color: white;
+	text-shadow: 0 -0.225em #00A995;
+	padding-bottom: 2em;
+}
+
+#hero-text h1 {
+	font-size: clamp(2rem, 5vw, 3rem);
+	margin-bottom: 0.5em;
+}
+
+#hero-text h2 {
+	font-size: clamp(1.25rem, 3.5vw, 1.75em);
+	margin-bottom: 0.5em;
+
+	text-shadow: 0 .125em var(--color-primary);
+}
+
+#hero-text a {
+	color: inherit
+}

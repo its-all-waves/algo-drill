@@ -13,9 +13,6 @@
 	align-items: center;
 	gap: calc(var(--main-menu-font-size) * 1.5);
 
-	text-align: center;
-	font-size: var(--main-menu-font-size);
-
 	background: black;
 }
 
@@ -23,6 +20,10 @@
 	position: relative;
 	background: none;
 	padding: 0;
+	border: none;
+
+	font-size: var(--main-menu-font-size);
+	text-align: center;
 }
 
 #main-menu .button:active {
@@ -41,6 +42,6 @@
 	outline: none;
 }
 
-#main-menu .button:focus-visible {
+/* #main-menu .button:focus-visible {
 	outline: 4px auto -webkit-focus-ring-color;
-}
+} */
