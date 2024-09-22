@@ -1,8 +1,8 @@
 import './LandingView.css'
 
-import GlassPane from '../shared/GlassPane'
-import Button from "../shared/Button"
-import Selector from '../shared/Selector'
+import GlassPane from '../../components/shared/GlassPane'
+import Button from '../../components/shared/Button'
+import Selector from '../../components/shared/Selector'
 
 export default function LandingView() {
 

@@ -1,25 +1,15 @@
 import { useState } from 'react'
-import './App.css'
 
-import GlassPane from './components/shared/GlassPane'
-import TextBox from './components/TextBox/TextBox'
+import GlassPane from '../../components/shared/GlassPane'
+import TextBox from '../../components/TextBox/TextBox'
 
-
-export default function App() {
-    return (
-        <div style={{ position: 'relative', height: '100dvh' }}>
-            <TypingTestView></TypingTestView>
-        </div>
-    )
-}
-
-function TypingTestView({ }) {
+export default function TypingTestView({ }) {
     const [$hasFocus, setHasFocus] = useState(false)
     function handleFocus() { setHasFocus(true) }
     function handleBlur() { setHasFocus(false) }
 
     return (
-        <div id="typing-test-view">
+        <div id="typing-test-view" className=' full-height'>
             <GlassPane inFocus={$hasFocus}>
                 <TextBox onFocus={handleFocus} onBlur={handleBlur}/>
             </GlassPane>

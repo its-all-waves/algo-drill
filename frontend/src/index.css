@@ -1,0 +1,81 @@
+
+:root {
+	color-scheme: light dark;
+
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+    --site-background: linear-gradient(to right top, hsla(173, 35%, 90%, 0.667), hsla(186, 100%, 33%, 0.686), hsla(199, 100%, 36%, 0.706), hsla(208, 100%, 37%, 0.631), hsla(217, 100%, 33%, 0.725), hsla(232, 65%, 40%, 0.635), hsla(251, 64%, 40%, 0.764), hsla(270, 99%, 32%, 0.69), hsla(279, 98%, 37%, 0.615), hsla(287, 97%, 42%, 0.624), hsla(294, 97%, 46%, 0.703), hsla(300, 100%, 50%, 0.651));
+
+	--color-primary: #C715FF;
+	--color-secondary: #00A995;
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+		color: #213547;
+		background-color: #ffffff;
+	}
+	a:hover {
+		color: #747bff;
+	}
+	button {
+		background-color: #f9f9f9;
+	}
+}
+
+@font-face {
+	font-family: 'JetBrains Mono Medium';
+	src: url('./assets/fonts/JetBrainsMono-Medium.ttf')
+}
+
+@font-face {
+	font-family: 'JetBrains Mono Bold';
+	src: url('./assets/fonts/JetBrainsMono-Bold.ttf')
+}
+
+* {
+	box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+	font-family: 'JetBrains Mono Medium', monospace;
+	color: rgba(255, 255, 255, 0.87);
+	background-color: #242424;
+}
+
+/* fixed background gradient fill */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: var(--site-background);
+    z-index: -100;
+}
+
+/* -- UTILITY CLASSES */
+
+.pos-relative { position: relative; }
+
+.pos-absolute { position: absolute; }
+
+.full-height { height: 100dvh; }
+
+/* -- END UTILITY CLASSES */
+
+/* -- BUTTON RESET */
+.button {
+	border: none;
+    outline: none;
+    background: none;
+}
+.button:focus { online: none; }
+.button:focus-visible { outline: 4px auto -webkit-focus-ring-color; }
+
+/* -- END BUTTON RESET */
