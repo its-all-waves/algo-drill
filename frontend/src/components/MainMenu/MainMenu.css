@@ -14,6 +14,15 @@
 	gap: calc(var(--main-menu-font-size) * 1.5);
 
 	background: black;
+	z-index: 200;
+}
+
+#main-menu {
+	transform: translateY(-100dvh);
+	transition: transform ease-in-out 0.2s;
+}
+#main-menu.open {
+	transform: translateY(0);
 }
 
 #main-menu .button {
@@ -42,6 +51,19 @@
 	outline: none;
 }
 
-/* #main-menu .button:focus-visible {
-	outline: 4px auto -webkit-focus-ring-color;
-} */
+#main-menu .main-menu-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 4rem;
+	background: none;
+	padding: 0;
+	margin: 2rem;
+
+	border-radius: 1rem;
+}
+
+#main-menu .main-menu-button img {
+	height: 100%;
+	width: 100%;
+}

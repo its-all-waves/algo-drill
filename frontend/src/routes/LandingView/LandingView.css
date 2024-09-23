@@ -52,3 +52,18 @@
 #hero-text a {
 	color: inherit
 }
+
+#landing-view .main-menu-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 4rem;
+	background: none;
+	padding: 0;
+	margin: 1rem;
+}
+
+#landing-view .main-menu-button img {
+	height: 100%;
+	width: 100%;
+}
