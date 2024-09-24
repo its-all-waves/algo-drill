@@ -1,16 +1,17 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
-
-// DEBUG
-// import App from './App.jsx'
-
 import { createBrowserRouter,RouterProvider } from 'react-router-dom'
 
 import './index.css'
+
 import Root from './routes/Root'
-import LandingView from './routes/LandingView/LandingView'
-import TypingTestView from './routes/TypingTestView/TypingTestView'
+
+import LandingView, { 
+	loader as landingViewLoader
+} from './routes/LandingView/LandingView'
+
+import TypingTestView, { loader as typingTestViewLoader } from './routes/TypingTestView/TypingTestView'
 
 
 export const router = createBrowserRouter([
@@ -21,11 +22,13 @@ export const router = createBrowserRouter([
         children: [
 			{
 				index: true,
-				element: <LandingView />
+				element: <LandingView />,
+				loader: landingViewLoader,
 			},
 			{
 				path: '/test',
-				element: <TypingTestView />
+				element: <TypingTestView />,
+				loader: typingTestViewLoader,
 			}
         ],
 	},

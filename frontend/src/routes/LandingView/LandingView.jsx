@@ -1,4 +1,4 @@
-import { useOutletContext } from 'react-router-dom'
+import { Form, redirect, useLoaderData, useOutletContext } from 'react-router-dom'
 
 import './LandingView.css'
 import GlassPane from '../../components/shared/GlassPane'
@@ -7,9 +7,25 @@ import Selector from '../../components/shared/Selector'
 
 import menuIcon from '../../assets/icons/Menu-Alt.svg'
 
+export async function loader({ request }) {
+    const LANG_OPTIONS = [
+        { name: 'Pseudo Code', value: 'pseudo-code' },
+        { name: 'Python', value: 'python' }
+    ]
+    const ALGO_OPTIONS = [
+        { name: 'Merge Sort', value: 'merge-sort' },
+        { name: 'Bubble Sort', value: 'bubble-sort' }
+    ]
+
+    return { LANG_OPTIONS, ALGO_OPTIONS }
+}
 
 export default function LandingView() {
     const { setMenuOpen } = useOutletContext()
+
+
+    // debugger
+    
 
     return (
         <div id='landing-view'>
@@ -23,7 +39,7 @@ export default function LandingView() {
                     className='main-menu-button'
                     onClick={() => setMenuOpen(true)}
                 >
-                <img src={menuIcon} alt='Open Menu' />
+                    <img src={menuIcon} alt='Open Menu' />
                 </button>
             </GlassPane>
         </div>
@@ -31,30 +47,23 @@ export default function LandingView() {
 }
 
 
-function StartForm() {
-    const LANG_OPTIONS = [
-        { name: 'Pseudo Code', value: 'pseudo-code' },
-        { name: 'Python', value: 'python' }
-    ]
-    const ALGO_OPTIONS = [
-        { name: 'Merge Sort', value: 'merge-sort' },
-        { name: 'Bubble Sort', value: 'bubble-sort' }
-    ]
+function StartForm({ }) {
+    const options = useLoaderData()
 
     return (
-        <form action="" id='start-form'>
+        <Form action="/test" id='start-form'>
             <div className="form-field">
                 <label htmlFor='select-language'>Language</label>
-                <Selector id='select-language' options={LANG_OPTIONS} />
+                <Selector name='lang' id='select-language' options={options.LANG_OPTIONS} />
             </div>
 
             <div className="form-field">
                 <label htmlFor='select-algorithm'>Algorithm</label>
-                <Selector id='select-algorithm' options={ALGO_OPTIONS} />
+                <Selector name='algo' id='select-algorithm' options={options.ALGO_OPTIONS} />
             </div>
 
-            <Button text='⇨' action={() => console.log('ACTION!')} />
-        </form>
+            <Button text='⇨' type='submit' />
+        </Form>
     )
 }
 

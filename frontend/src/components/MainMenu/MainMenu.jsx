@@ -3,35 +3,21 @@ import { useState, useEffect } from 'react'
 import './MainMenu.css'
 
 import closeIcon from '../../assets/icons/Close-icon-(1).svg'
+import { NavLink } from 'react-router-dom'
 
-export default function MainMenu({ isOpen, setIsOpen, isLoggedIn = true, }) {
+export default function MainMenu({ isOpen, setIsOpen, isLoggedIn = false, }) {
+    const STATIC_MENU_OPTIONS = [
+        { text: 'Start', route: '/' },
+    ]
     const MENU_OPTIONS_LOGGED_IN = [
-        {
-            text: 'Start',
-            onClick() { console.log('pressed Start') }
-        },
-        {
-            text: 'My Stuff',
-            onClick() { console.log('pressed My Stuff') }
-        },
-        {
-            text: 'Submit an Algo',
-            onClick() { console.log('pressed Submit an Algo') }
-        },
-        {
-            text: 'Log Out',
-            onClick() { console.log('pressed Log Out') }
-        }
+        ...STATIC_MENU_OPTIONS,
+        { text: 'My Stuff', route: '#' },
+        { text: 'Submit an Algo', route: '#' },
+        { text: 'Log Out', route: '#' }
     ]
     const MENU_OPTIONS_LOGGED_OUT = [
-        {
-            text: 'Start',
-            onClick() { console.log('pressed Start') }
-        },
-        {
-            text: 'Log In',
-            onClick() { console.log('pressed Log In') }
-        }
+        ...STATIC_MENU_OPTIONS,
+        { text: 'Log In', route: '#' }
     ]
 
     const [menuOptions, setMenuOptions] = useState([])
@@ -54,25 +40,19 @@ export default function MainMenu({ isOpen, setIsOpen, isLoggedIn = true, }) {
             </button>
             {menuOptions.map(btn => {
                 return (
-                    <MenuOption
-                        key={btn.text}
-                        text={btn.text}
-                        onClick={btn.onClick} />
+                    <NavLink key={btn.text}
+                        to={btn.route}
+                        onClick={() => setIsOpen(false)}
+                        className='button'
+                        // TODO: show active status on menu option
+                        // className={( ({ isActive }) => (
+                        //     isActive ? 'active' : ''
+                        // ))}
+                    >
+                        {btn.text}
+                    </NavLink>
                 )
             })}
         </div>
     )
 }
-
-function MenuOption({ text, onClick }) {
-    return (
-        <button
-            type="button"
-            className='button'
-            onClick={onClick}
-        >
-            {text}
-        </button>
-    )
-}
-

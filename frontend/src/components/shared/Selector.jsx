@@ -11,12 +11,12 @@ import './Selector.css'
 //     }
 // ]
 
-export default function Selector({ id, options, color }) {
+export default function Selector({ id, name, options, color }) {
 
 
 
     return (
-        <select id={id} className='selector'>
+        <select id={id} name={name} className='selector'>
             {options.map(opt => {
                 return (
                     <option
