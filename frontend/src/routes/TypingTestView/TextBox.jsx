@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 
 import './TextBox.css'
-
 import Line from './Line'
 import Char from './Char'
 

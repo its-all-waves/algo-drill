@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import GlassPane from '../../components/shared/GlassPane'
-import TextBox from '../../components/TextBox/TextBox'
+import TextBox from './TextBox'
 import { useLoaderData } from 'react-router-dom'
 
 export function loader({ request }) {
