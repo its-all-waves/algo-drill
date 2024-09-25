@@ -4,7 +4,9 @@
 }
 
 #main-menu {
-	position: relative;
+	/* position: relative; */
+	position: absolute;
+	inset: 0;
 	height: 100dvh;
 
 	display: flex;

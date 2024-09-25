@@ -6,6 +6,8 @@ import Button from '../../components/shared/Button'
 import Selector from '../../components/shared/Selector'
 
 import menuIcon from '../../assets/icons/Menu-Alt.svg'
+import { useContext } from 'react'
+import { RootContext } from '../../rootContext'
 
 export async function loader({ request }) {
     const LANG_OPTIONS = [
@@ -21,11 +23,7 @@ export async function loader({ request }) {
 }
 
 export default function LandingView() {
-    const { setMenuOpen } = useOutletContext()
-
-
-    // debugger
-    
+    const { setMenuOpen } = useContext(RootContext)
 
     return (
         <div id='landing-view'>

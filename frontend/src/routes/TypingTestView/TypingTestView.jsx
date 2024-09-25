@@ -1,15 +1,21 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 
+import { useLoaderData } from 'react-router-dom'
+
+import Toolbar from './Toolbar'
 import GlassPane from '../../components/shared/GlassPane'
 import TextBox from './TextBox'
-import { useLoaderData } from 'react-router-dom'
+
+import { RootContext } from '../../rootContext'
 
 export function loader({ request }) {
     const url = new URL(request.url)
     const language = url.searchParams.get('language')
     // const algorithm = url.searchParams.get('algo')
 
-    // FAKE FETCH FROM THE SERVER
+    // TODO: fetch the algo from the server
+
+    // DEBUG - MOCK FETCH RESULT
     const algorithm = `def merge(arr, left, mid, right):
     n1 = mid - left + 1
     n2 = right - mid
@@ -62,15 +68,21 @@ export default function TypingTestView({ }) {
 
     const [$hasFocus, setHasFocus] = useState(false)
 
+    const { setMenuOpen } = useContext(RootContext)
+
     return (
+        // TODO: fix css - glass pane should stretch to fit remainder of page height -- not 100% of the page height, thus causing overflow
         <div id="typing-test-view" className='full-height'>
-            <GlassPane inFocus={$hasFocus}>
-                <TextBox
-                    algorithm={algorithm}
-                    onFocus={() => setHasFocus(true)}
-                    onBlur={() => setHasFocus(false)}
-                />
-            </GlassPane>
+            <Toolbar setMenuOpen={() => setMenuOpen(true)}/>
+            <div className="container pos-relative full-height">
+                <GlassPane inFocus={$hasFocus}>
+                    <TextBox
+                        algorithm={algorithm}
+                        onFocus={() => setHasFocus(true)}
+                        onBlur={() => setHasFocus(false)}
+                    />
+                </GlassPane>
+            </div>
         </div>
     )
 }

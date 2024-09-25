@@ -1,0 +1,25 @@
+#toolbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	background: black;
+	height: 2rem;	
+
+	padding-inline: 1rem;
+	padding-block: 0;
+}
+
+#toolbar button * {
+
+}
+
+#toolbar img {
+	height: 1rem;
+}
+
+#toolbar .controls {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
